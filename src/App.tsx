@@ -10,6 +10,9 @@ import { MatchHistory } from "./components/MatchHistory";
 import { ImprovementTips } from "./components/ImprovementTips";
 import { HomePage } from "./components/HomePage";
 import { SidebarTabs } from "./components/SidebarTabs";
+import { PrivacyPolicy } from "./components/PrivacyPolicy";
+import { ContactPage } from "./components/ContactPage";
+import { Footer } from "./components/Footer";
 
 const REGIONS = [
   { id: "br1", name: "Brasil" },
@@ -31,9 +34,10 @@ export default function App() {
   const [matchStart, setMatchStart] = useState(0);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [targetRank, setTargetRank] = useState("GOLD");
-  const [selectedLane, setSelectedLane] = useState("AUTO");
+  const [selectedLane, setSelectedLane] = useState("");
   const [recentSearches, setRecentSearches] = useState<{ name: string; tag: string; region: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [page, setPage] = useState<"home" | "privacy" | "contact">("home");
 
   useEffect(() => {
     const saved = localStorage.getItem("lol_recent_searches");
@@ -128,11 +132,23 @@ export default function App() {
     }
   };
 
-  const handleFilterChange = (filter: string) => {
+  const handleFilterChange = async (filter: string) => {
+    if (!summoner) return;
     setMatchFilter(filter);
     setMatchStart(0);
     setMatches([]);
-    loadMatches(filter, 0, false);
+    setLoadingMatches(true);
+    try {
+      const filterParam = filter === "all" ? "" : `&queue=${filter}`;
+      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=0&count=10${filterParam}`);
+      if (!res.ok) throw new Error("Erro ao buscar partidas filtradas");
+      const data = await res.json();
+      setMatches(data);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoadingMatches(false);
+    }
   };
 
   const handleLoadMore = () => {
@@ -144,14 +160,33 @@ export default function App() {
   const flexData = getQueueData("RANKED_FLEX_SR");
 
   const baseUserStats = calculateUserStats(matches, summoner);
+  // Auto-detect lane from matches; if user manually selected one, use that instead
+  const detectedLane = baseUserStats.lane || "BOTTOM"; // BOTTOM (ADC) as sensible default
+  const effectiveLane = selectedLane !== "" ? selectedLane : detectedLane;
   const userStats = { 
     ...baseUserStats, 
-    lane: selectedLane === "AUTO" ? baseUserStats.lane : selectedLane 
+    lane: effectiveLane
   };
+  
+  // Sync the selector to show the detected lane if none selected yet
+  // (done inline — no need for useEffect; selector drives from selectedLane state)
   
   const streak = getStreak(matches, summoner);
   
   const soloWinRate = getWinRate(soloData);
+
+  // Win rate from the currently displayed (already server-filtered) matches
+  const filteredWinRate = (() => {
+    if (!summoner || matches.length === 0) return soloWinRate;
+    const myPuuid = summoner.account.puuid;
+    const wins = matches.filter(m => m.info.participants.find(p => p.puuid === myPuuid)?.win).length;
+    return Math.round((wins / matches.length) * 100);
+  })();
+
+  const filterLabel = matchFilter === "all" ? "Últimas partidas" :
+    matchFilter === "420" ? "Ranqueada Solo" :
+    matchFilter === "440" ? "Ranqueada Flex" :
+    matchFilter === "450" ? "ARAM" : "Partidas";
 
   const suggestions = recentSearches.filter(s => 
     s.name.toLowerCase().includes(searchInput.toLowerCase()) || 
@@ -176,7 +211,18 @@ export default function App() {
         isHome={isHome}
       />
 
-      {isHome ? (
+      {/* Static pages */}
+      {page === "privacy" && (
+        <div className="flex-1">
+          <PrivacyPolicy onBack={() => setPage("home")} />
+        </div>
+      )}
+      {page === "contact" && (
+        <div className="flex-1">
+          <ContactPage onBack={() => setPage("home")} />
+        </div>
+      )}
+      {page === "home" && isHome ? (
         <HomePage
           searchInput={searchInput}
           setSearchInput={setSearchInput}
@@ -188,6 +234,7 @@ export default function App() {
           setShowSuggestions={setShowSuggestions}
           handleSearch={handleSearch}
           REGIONS={REGIONS}
+          onNavigate={(p) => setPage(p as any)}
         />
       ) : (
         <main className="max-w-[1080px] mx-auto px-4 py-8 flex-1 w-full">
@@ -218,7 +265,7 @@ export default function App() {
                     targetRank={targetRank} 
                     setTargetRank={setTargetRank} 
                     currentTier={soloData?.tier || "UNRANKED"} 
-                    selectedLane={selectedLane}
+                    selectedLane={effectiveLane}
                     setSelectedLane={setSelectedLane}
                   />
 
@@ -226,7 +273,8 @@ export default function App() {
                   {matches.length > 0 && (
                     <SidebarTabs 
                       matches={matches} 
-                      puuid={summoner.account.puuid} 
+                      puuid={summoner.account.puuid}
+                      region={region}
                       onPlayerClick={(gameName, tagLine) => handleSearch(undefined, gameName, tagLine, region)}
                     />
                   )}
@@ -234,12 +282,13 @@ export default function App() {
 
                 {/* Main Content */}
                 <div className="flex-1 overflow-hidden">
-                  <StatsSummary userStats={userStats} targetRank={targetRank} winRate={soloWinRate} />
+                  <StatsSummary userStats={userStats} targetRank={targetRank} winRate={filteredWinRate} filterLabel={filterLabel} />
 
                   {matches.length > 0 ? (
                     <MatchHistory 
                       matches={matches} 
                       summoner={summoner} 
+                      region={region}
                       onPlayerClick={(gameName, tagLine) => handleSearch(undefined, gameName, tagLine, region)} 
                       matchFilter={matchFilter}
                       onFilterChange={handleFilterChange}
@@ -257,6 +306,7 @@ export default function App() {
           )}
         </main>
       )}
+      <Footer onNavigate={(p) => setPage(p as any)} />
     </div>
   );
 }

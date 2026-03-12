@@ -1,6 +1,7 @@
 import React from "react";
 import { Search, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import logo from "../assets/images/logo/logo.png";
 
 interface HeaderProps {
   searchInput: string;
@@ -34,8 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-[1080px] mx-auto px-4 h-16 flex items-center justify-between">
         {/* LOGO AREA */}
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-1 font-black text-white text-[22px] tracking-tight hover:cursor-pointer" onClick={() => window.location.reload()}>
-            <span className="text-[#4C92FC]">Spriters</span> LOL
+          <div className="flex items-center gap-1 hover:cursor-pointer hover:opacity-80 transition-opacity" onClick={() => window.location.reload()}>
+            <img src={logo} alt="Spriters LOL" className="h-[36px] w-auto object-contain" />
           </div>
         </div>
 

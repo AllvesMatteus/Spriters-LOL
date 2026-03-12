@@ -77,6 +77,21 @@ async function startServer() {
     }
   });
 
+  // Lightweight rank fetch by PUUID (used by tooltip hover)
+  app.get("/api/rank", async (req, res) => {
+    const { puuid, region } = req.query;
+    if (!puuid || !region) return res.status(400).json({ error: "Missing puuid or region" });
+    try {
+      const url = `https://${region}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}?api_key=${RIOT_API_KEY}`;
+      const r = await fetch(url);
+      if (!r.ok) return res.status(r.status).json({ error: "Rank not found" });
+      const data = await r.json();
+      res.json(data);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/matches", async (req, res) => {
     const { puuid, region, count = 10, start = 0, queue } = req.query;
     const routing = REGION_ROUTING[region as string] || "americas";

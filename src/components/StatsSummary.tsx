@@ -7,9 +7,10 @@ interface StatsSummaryProps {
   userStats: RankStats;
   targetRank: string;
   winRate: number;
+  filterLabel?: string;
 }
 
-export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRank, winRate }) => {
+export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRank, winRate, filterLabel = "Últimas partidas" }) => {
   const targetStats = getAdjustedTargetStats(targetRank, userStats.lane);
 
   const radarData = [
@@ -33,7 +34,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRan
            userStats.lane === "TOP" ? "Top" : "N/A"
           }
         </div>
-        <p className="text-[12px] font-bold text-[#9e9eb1] mb-4 uppercase">Últimas 20 Partidas</p>
+        <p className="text-[12px] font-bold text-[#9e9eb1] mb-4 uppercase tracking-wide">{filterLabel}</p>
         <div className="relative w-24 h-24 mb-2">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
             <path

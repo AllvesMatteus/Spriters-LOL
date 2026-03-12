@@ -47,9 +47,12 @@ export interface MatchData {
       neutralMinionsKilled: number;
       goldEarned: number;
       totalDamageDealtToChampions: number;
+      totalDamageTaken: number;
       visionScore: number;
-      individualPosition: string;
+      // teamPosition is the official Riot field: "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"
       teamPosition: string;
+      // individualPosition is a secondary guess, less reliable
+      individualPosition: string;
       teamId: number;
       champLevel: number;
       summoner1Id: number;
@@ -61,6 +64,35 @@ export interface MatchData {
       item4: number;
       item5: number;
       item6: number;
+      // Combat
+      doubleKills: number;
+      tripleKills: number;
+      quadraKills: number;
+      pentaKills: number;
+      firstBloodKill: boolean;
+      // Farming
+      neutralMinionsKilledTeamJungle?: number;
+      neutralMinionsKilledEnemyJungle?: number;
+      // Vision
+      visionWardsBoughtInGame: number;
+      wardsPlaced: number;
+      wardsKilled: number;
+      detectorWardsPlaced: number;
+      // Objectives & Structures
+      damageDealtToObjectives: number;   // Structures + Dragons + Baron
+      damageDealtToTurrets: number;
+      turretKills: number;
+      turretTakedowns: number;
+      inhibitorKills: number;
+      // Utility / CC
+      timeCCingOthers: number;           // seconds of CC applied
+      totalTimeCCDealt: number;
+      totalHeal: number;
+      totalHealsOnTeammates: number;
+      totalDamageShieldedOnTeammates: number;
+      // Ranked role
+      role: string;
+      lane: string;
     }>;
   };
 }

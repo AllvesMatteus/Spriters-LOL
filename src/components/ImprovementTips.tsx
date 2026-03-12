@@ -2,6 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { RankStats, RANK_AVERAGES } from "../types";
 import { getAdjustedTargetStats } from "../utils/helpers";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import imgLaneTop     from "../assets/images/lanes/lane-top.png";
+import imgLaneJungle  from "../assets/images/lanes/lane-jungle.png";
+import imgLaneMid     from "../assets/images/lanes/lane-mid.png";
+import imgLaneAdc     from "../assets/images/lanes/lane-adc.png";
+import imgLaneSupport from "../assets/images/lanes/lane-support.png";
 
 interface ImprovementTipsProps {
   userStats: RankStats;
@@ -38,19 +43,22 @@ export const ImprovementTips: React.FC<ImprovementTipsProps> = ({
   const renderStatTip = (label: string, userVal: number, targetVal: number, unit: string = "") => {
     const diff = userVal - targetVal;
     const isGood = diff >= 0;
-    const percent = Math.min(100, Math.max(10, (userVal / (targetVal || 1)) * 50));
+    // Bar: 100% full if above average; proportional fill (5%-99%) if below
+    const percent = isGood ? 100 : Math.min(99, Math.max(5, (userVal / (targetVal || 1)) * 100));
 
     return (
       <div className="bg-[#111215] border border-[#2b2c30] p-3 rounded-lg flex flex-col gap-2">
         <div className="flex justify-between items-center">
           <span className={`font-bold text-[12px] uppercase ${isGood ? "text-[#5de8c8]" : "text-[#f24254]"}`}>{label}</span>
-          <span className="text-[10px] text-[#9e9eb1] font-bold">{isGood ? "EXCELENTE" : "MELHORAR"}</span>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${isGood ? "text-[#5de8c8] bg-[#5de8c8]/10" : "text-[#f24254] bg-[#f24254]/10"}`}>
+            {isGood ? "✓ ACIMA DA MÉDIA" : "↑ PRECISA MELHORAR"}
+          </span>
         </div>
         
         <div className="flex flex-col gap-1">
           <div className="flex justify-between text-[11px] text-[#9e9eb1]">
-            <span>Você: <strong>{userVal}{unit}</strong></span>
-            <span>Meta: <strong>{targetVal}{unit}</strong></span>
+            <span>Você: <strong className="text-[#e1e1e1]">{userVal}{unit}</strong></span>
+            <span>Média do Elo: <strong>{targetVal}{unit}</strong></span>
           </div>
           <div className="h-1.5 w-full bg-[#1c1d21] rounded-full overflow-hidden border border-[#2b2c30]">
             <div 
@@ -58,6 +66,11 @@ export const ImprovementTips: React.FC<ImprovementTipsProps> = ({
               style={{ width: `${percent}%` }}
             />
           </div>
+          {isGood && (
+            <span className="text-[9px] text-[#5de8c8]/70 italic">
+              +{Math.abs(Number((diff).toFixed(2)))} {unit} acima da média — ponto forte! 💪
+            </span>
+          )}
         </div>
       </div>
     );
@@ -86,36 +99,59 @@ export const ImprovementTips: React.FC<ImprovementTipsProps> = ({
 
         <div className="flex flex-col gap-2 bg-[#111215] border border-[#2b2c30] p-3 rounded-lg">
           <span className="text-[11px] font-bold text-[#9e9eb1] uppercase tracking-wider">Rota para Comparação:</span>
-          <div className="flex gap-1">
+          <div className="flex gap-1.5">
             {[
-              { id: "AUTO", label: "Auto", icon: "🔍" },
-              { id: "TOP", label: "Top", icon: "🛡️" },
-              { id: "JUNGLE", label: "Jg", icon: "🌿" },
-              { id: "MIDDLE", label: "Mid", icon: "🔥" },
-              { id: "BOTTOM", label: "Adc", icon: "🏹" },
-              { id: "UTILITY", label: "Sup", icon: "✨" }
-            ].map(lane => (
-              <button
-                key={lane.id}
-                onClick={() => setSelectedLane(lane.id)}
-                className={`flex-1 py-1.5 px-1 rounded text-[10px] font-bold transition-all border ${
-                  selectedLane === lane.id
-                    ? "bg-[#5de8c8]/20 border-[#5de8c8] text-[#5de8c8]"
-                    : "bg-[#1c1d21] border-[#2b2c30] text-[#9e9eb1] hover:border-[#9e9eb1]/50"
-                }`}
-                title={lane.label}
-              >
-                <div className="text-[14px] mb-0.5">{lane.icon}</div>
-                {lane.label}
-              </button>
-            ))}
+              { id: "TOP",     label: "Top",  img: imgLaneTop },
+              { id: "JUNGLE",  label: "Jg",   img: imgLaneJungle },
+              { id: "MIDDLE",  label: "Mid",  img: imgLaneMid },
+              { id: "BOTTOM",  label: "Adc",  img: imgLaneAdc },
+              { id: "UTILITY", label: "Sup",  img: imgLaneSupport }
+            ].map(lane => {
+              const isSelected = selectedLane === lane.id;
+              return (
+                <button
+                  key={lane.id}
+                  onClick={() => setSelectedLane(lane.id)}
+                  title={lane.label}
+                  className={`
+                    flex-1 flex flex-col items-center justify-center gap-1
+                    py-2 px-1 rounded-lg border transition-all duration-200
+                    ${isSelected
+                      ? "bg-[#C8AA6E]/10 border-[#C8AA6E]/60"
+                      : "bg-[#1c1d21] border-[#2b2c30] hover:border-[#9e9eb1]/40 hover:bg-[#2b2c30]/50"
+                    }
+                  `}
+                >
+                  {lane.img ? (
+                    <img
+                      src={lane.img}
+                      alt={lane.label}
+                      className="w-[22px] h-[22px] object-contain transition-all duration-200"
+                      style={{
+                        filter: isSelected
+                          ? "brightness(0) saturate(100%) invert(79%) sepia(30%) saturate(700%) hue-rotate(2deg) brightness(105%)"
+                          : "brightness(0) invert(60%)"
+                      }}
+                    />
+                  ) : (
+                    <span className={`text-[16px] transition-all ${isSelected ? "opacity-100" : "opacity-40"}`}>
+                      🔍
+                    </span>
+                  )}
+                  <span className={`text-[10px] font-bold uppercase tracking-tight transition-colors ${isSelected ? "text-[#C8AA6E]" : "text-[#9e9eb1]"}`}>
+                    {lane.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-          <p className="text-[10px] text-[#9e9eb1] italic mt-1">
+          <p className="text-[10px] text-[#9e9eb1] italic mt-0.5">
             * Estatísticas de {targetRank} ajustadas para {
               userStats.lane === "UTILITY" ? "Suporte" :
               userStats.lane === "BOTTOM" ? "Atirador" :
               userStats.lane === "JUNGLE" ? "Selva" :
-              userStats.lane === "MIDDLE" ? "Meio" : "Topo"
+              userStats.lane === "MIDDLE" ? "Meio" :
+              userStats.lane === "TOP" ? "Topo" : "Auto"
             }
           </p>
         </div>

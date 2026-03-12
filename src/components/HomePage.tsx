@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Footer } from "./Footer";
+import logo from "../assets/images/logo/logo.png";
 
 interface HomePageProps {
   searchInput: string;
@@ -14,6 +15,7 @@ interface HomePageProps {
   setShowSuggestions: (val: boolean) => void;
   handleSearch: (e?: React.FormEvent, overrideName?: string, overrideTag?: string, overrideRegion?: string) => void;
   REGIONS: { id: string; name: string }[];
+  onNavigate?: (page: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -27,6 +29,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   setShowSuggestions,
   handleSearch,
   REGIONS,
+  onNavigate,
 }) => {
   const [patches, setPatches] = useState<{ title: string; url: string; date: string }[]>([]);
 
@@ -87,15 +90,14 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-64px)] pt-16 px-4">
-      {/* Central Illustration Placeholder */}
-      <div className="relative w-full max-w-[600px] h-[250px] mb-8 flex items-center justify-center">
-        {/* We use a stylized banner instead of the DeepL static image to fit the Spriters brand */}
-        <div className="text-center space-y-2">
-          <h1 className="text-[64px] font-black tracking-tighter text-white drop-shadow-2xl">
-            <span className="text-[#4C92FC]">Spriters</span> LOL
-          </h1>
-          <p className="text-[#9e9eb1] font-bold tracking-widest uppercase text-sm">Estatísticas do League of Legends</p>
-        </div>
+      {/* Central Logo & Hero */}
+      <div className="relative w-full max-w-[600px] mb-8 flex flex-col items-center justify-center gap-4">
+        <img 
+          src={logo} 
+          alt="Spriters LOL" 
+          className="h-[140px] w-auto object-contain drop-shadow-[0_0_40px_rgba(76,146,252,0.25)] select-none" 
+        />
+        <p className="text-[#9e9eb1] font-bold tracking-widest uppercase text-sm">Estatísticas do League of Legends</p>
       </div>
 
       {/* Main Big Search Bar */}
@@ -204,7 +206,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </div>
 
-      <Footer />
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

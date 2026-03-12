@@ -129,67 +129,115 @@ export const SPELL_ICONS: Record<number, string> = {
 
 export const calculateAIScore = (p: any, match: MatchData): { score: number; isMVP: boolean } => {
   const teamParticipants = match.info.participants.filter((part) => part.teamId === p.teamId);
-  const teamKills = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.kills, 0));
-  const teamDamage = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageDealtToChampions, 0));
-  const teamGold = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.goldEarned, 0));
+  const teamKills    = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.kills, 0));
+  const teamDamage   = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageDealtToChampions, 0));
+  const teamGold     = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.goldEarned, 0));
 
-  const kp = (p.kills + p.assists) / teamKills;
-  const damageShare = p.totalDamageDealtToChampions / teamDamage;
-  const goldShare = p.goldEarned / teamGold;
-  
-  const durationMin = Math.max(1, match.info.gameDuration / 60);
-  const cspm = (p.totalMinionsKilled + p.neutralMinionsKilled) / durationMin;
-  const visionpm = p.visionScore / durationMin;
+  const kp           = (p.kills + p.assists) / teamKills;
+  const damageShare  = p.totalDamageDealtToChampions / teamDamage;
+  const goldShare    = p.goldEarned / teamGold;
+  const durationMin  = Math.max(1, match.info.gameDuration / 60);
+  const cspm         = (p.totalMinionsKilled + p.neutralMinionsKilled) / durationMin;
+  const visionpm     = p.visionScore / durationMin;
+
+  // Use teamPosition as primary (authoritative Riot API v5 field for 5-player ranked role)
+  // Falls back to individualPosition only if teamPosition is empty or INVALID
+  const position = (p.teamPosition && p.teamPosition !== "" && p.teamPosition !== "Invalid")
+    ? p.teamPosition
+    : p.individualPosition;
+
+  const isSupport = position === "UTILITY";
+  const isJungler = position === "JUNGLE";
+  const isTop     = position === "TOP";
+  const isMid     = position === "MIDDLE";
+  const isAdc     = position === "BOTTOM";
 
   let score = 0;
 
-  // 1. KDA RATIO (30 pts max) - High reward for efficiency
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [1] KDA EFFICIENCY — 28 pts max
+  //     Perfect KDA 10:0 = 28 pts; 2:1 = ~12 pts; 0:5 = 0 pts
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   const kdaRatio = (p.kills + p.assists) / Math.max(1, p.deaths);
-  score += Math.min(30, kdaRatio * 5);
+  score += Math.min(28, kdaRatio * 4.5);
 
-  // 2. PARTICIPATION (25 pts max) - KP is huge
-  score += Math.min(25, kp * 38);
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [2] KILL PARTICIPATION — 22 pts max
+  //     100% KP = 22 pts | carry games tend to have 60-80%
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  score += Math.min(22, kp * 35);
 
-  // 3. DAMAGE EFFICIENCY (15 pts max)
-  // Reward doing damage while not hogging all the gold
-  const damageEffectiveness = (damageShare / Math.max(0.1, goldShare));
-  score += Math.min(15, damageEffectiveness * 8);
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [3] DAMAGE EFFICIENCY — 15 pts max
+  //     Rewards dealing MORE damage than the gold they used
+  //     A player with 20% team damage using 15% team gold → ratio 1.33 → good
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const dmgEff = damageShare / Math.max(0.05, goldShare);
+  score += Math.min(15, dmgEff * 9);
 
-  // 4. VISION & CONTROL (10 pts max)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [4] VISION CONTROL — 10 pts max
+  //     visionScore/min + control wards bought
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   score += Math.min(6, visionpm * 5);
-  score += Math.min(4, (p.visionWardsBoughtInGame || 0) * 0.8);
+  score += Math.min(4, (p.visionWardsBoughtInGame || 0) * 1.0);
 
-  // 5. OBJECTIVES & STRUCTURES (10 pts max)
-  const objDamage = (p.damageDealtToObjectives || 0) / (durationMin * 150);
-  score += Math.min(10, objDamage + (p.turretKills * 2.5));
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [5] OBJECTIVES & STRUCTURES — 10 pts max
+  //     damageDealtToObjectives includes Dragons, Baron, Rift Herald, Towers, Inhibitors
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  const objPerMin = (p.damageDealtToObjectives || 0) / durationMin;
+  score += Math.min(7, objPerMin / 40);
+  score += Math.min(3, (p.turretKills || 0) * 1.5);
 
-  // 6. ROLE SPECIFIC (10 pts max)
-  const isSupport = p.teamPosition === "UTILITY" || (p.individualPosition === "UTILITY");
-  const isJungler = p.teamPosition === "JUNGLE" || (p.individualPosition === "JUNGLE");
-
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [6] ROLE-SPECIFIC BONUS — 10 pts max
+  //     Each role has a unique primary metric rewarded here
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   if (isSupport) {
-    const ccImpact = (p.timeCCingOthers || 0) / durationMin;
-    score += Math.min(10, ccImpact * 8);
+    // Supports: CC Time (timeCCingOthers = seconds applied to enemies) + Healing/Shielding
+    const ccPerMin = (p.timeCCingOthers || 0) / durationMin;
+    score += Math.min(6, ccPerMin * 6);
+    const healShield = ((p.totalHealsOnTeammates || 0) + (p.totalDamageShieldedOnTeammates || 0)) / (durationMin * 80);
+    score += Math.min(4, healShield);
   } else if (isJungler) {
-    // Junglers get rewarded for neutral objective participation
-    score += Math.min(10, (p.damageDealtToObjectives / (durationMin * 100)));
+    // Junglers: Objective control (Dragon/Baron/Herald dmg) + kill impact on map
+    const jgObjPerMin = (p.damageDealtToObjectives || 0) / durationMin;
+    score += Math.min(6, jgObjPerMin / 30);
+    score += Math.min(4, (p.kills * 0.8)); // Junglers carry via good pathing → kills are indicative
+  } else if (isTop) {
+    // Top: Split push + Team fight trade (damage taken shows commitment)
+    score += Math.min(6, cspm * 0.8);
+    score += Math.min(4, (p.damageDealtToTurrets || 0) / (durationMin * 300));
+  } else if (isMid) {
+    // Mid: High damage output + roaming (shows in KP) — cspm + damage
+    score += Math.min(5, cspm * 0.6);
+    score += Math.min(5, damageShare * 20);
+  } else if (isAdc) {
+    // ADC: Primary carry — CS efficiency and damage concentration
+    score += Math.min(6, cspm * 0.8);
+    score += Math.min(4, damageShare * 15);
   } else {
-    // Laners get rewarded for high CSPM (10 CSPM = 10 pts)
-    score += Math.min(10, cspm * 1.0);
+    // Unknown position fallback
+    score += Math.min(10, cspm * 0.8);
   }
 
-  // 7. MULTI-KILL BONUSES
-  if (p.pentaKills > 0) score += 10;
-  else if (p.quadraKills > 0) score += 5;
-  else if (p.tripleKills > 0) score += 2;
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [7] MULTI-KILL BONUSES — max +10
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  if (p.pentaKills > 0)       score += 10;
+  else if (p.quadraKills > 0) score += 6;
+  else if (p.tripleKills > 0) score += 3;
+  else if (p.doubleKills > 0) score += 1;
 
-  // 8. DEEP FEEDING PENALTY
-  if (p.deaths > 8) {
-    score -= (p.deaths - 8) * 3;
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // [8] FEEDING PENALTY — excessive deaths drag the team down
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  if (p.deaths > 7) {
+    score -= (p.deaths - 7) * 2.5;
   }
 
   score = Math.min(100, Math.max(0, score));
-  
   return { score, isMVP: false };
 };
 

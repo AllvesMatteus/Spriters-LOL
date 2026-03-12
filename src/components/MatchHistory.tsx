@@ -209,19 +209,24 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, o
                       {multiKillTag}
                     </span>
                   )}
-                  {isMVP ? (
-                    <span className="bg-[#f0ba65] text-white text-[10px] md:text-[11px] font-extrabold px-2 py-0.5 rounded-full">
-                      MVP
+                  <div className="flex flex-col items-center">
+                    {isMVP ? (
+                      <span className="bg-[#f0ba65] text-white text-[10px] md:text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                        MVP
+                      </span>
+                    ) : isACE ? (
+                      <span className="bg-[#8b5bd3] text-white text-[10px] md:text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                        ACE
+                      </span>
+                    ) : (
+                      <span className="bg-[#7b7a8e] text-white text-[10px] md:text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        {myRank}º
+                      </span>
+                    )}
+                    <span className="text-[9px] font-black text-[#9e9eb1] mt-0.5">
+                      {(calculateAIScore(p, match).score / 10).toFixed(1)}
                     </span>
-                  ) : isACE ? (
-                    <span className="bg-[#8b5bd3] text-white text-[10px] md:text-[11px] font-extrabold px-2 py-0.5 rounded-full">
-                      ACE
-                    </span>
-                  ) : (
-                    <span className="bg-[#7b7a8e] text-white text-[10px] md:text-[11px] font-bold px-2 py-0.5 rounded-full">
-                      {myRank}º
-                    </span>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>

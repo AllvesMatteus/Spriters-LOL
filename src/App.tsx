@@ -89,7 +89,7 @@ export default function App() {
     setMatchStart(0);
 
     try {
-      const summonerRes = await fetch(`/api/summoner?gameName=${finalName}&tagLine=${finalTag}&region=${finalRegion}`);
+      const summonerRes = await fetch(`/api/summoner?gameName=${encodeURIComponent(finalName)}&tagLine=${encodeURIComponent(finalTag)}&region=${finalRegion}`);
       if (!summonerRes.ok) throw new Error("Invocador não encontrado");
       const summonerData = await summonerRes.json();
       setSummoner(summonerData);

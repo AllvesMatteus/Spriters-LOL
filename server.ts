@@ -46,8 +46,13 @@ async function startServer() {
     try {
       // 1. Get PUUID from Riot ID
       const accountUrl = `https://${routing}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}?api_key=${RIOT_API_KEY}`;
+      console.log(`[API] Fetching: ${accountUrl.replace(RIOT_API_KEY!, 'REDACTED')}`);
       const accountRes = await fetch(accountUrl);
-      if (!accountRes.ok) throw new Error("Account not found");
+      if (!accountRes.ok) {
+        const errBody = await accountRes.text();
+        console.error(`[API] Account response ${accountRes.status}:`, errBody);
+        throw new Error(`Account not found (${accountRes.status})`);
+      }
       const accountData = await accountRes.json();
 
       // 2. Get Summoner Data from PUUID
@@ -67,6 +72,7 @@ async function startServer() {
         league: leagueData,
       });
     } catch (error: any) {
+      console.error("Summoner Error:", error.message);
       res.status(500).json({ error: error.message });
     }
   });

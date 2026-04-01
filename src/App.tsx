@@ -76,9 +76,9 @@ export default function App() {
     localStorage.setItem("lol_recent_searches", JSON.stringify(updated));
   };
 
-  const saveSearch = (name: string, tag: string, reg: string) => {
+  const saveSearch = (name: string, tag: string, reg: string, profileIconId?: number) => {
     const existing = recentSearches.find(s => s.name === name && s.tag === tag);
-    const newSearch = { name, tag, region: reg, favorite: existing?.favorite || false };
+    const newSearch = { name, tag, region: reg, profileIconId: profileIconId || existing?.profileIconId, favorite: existing?.favorite || false };
     const filtered = recentSearches.filter(s => !(s.name === name && s.tag === tag));
     const updated = [newSearch, ...filtered].slice(0, 10);
     const sorted = [...updated].sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
@@ -117,7 +117,7 @@ export default function App() {
       if (!summonerRes.ok) throw new Error("Invocador não encontrado");
       const summonerData = await summonerRes.json();
       setSummoner(summonerData);
-      saveSearch(finalName, finalTag, finalRegion);
+      saveSearch(finalName, finalTag, finalRegion, summonerData.summoner?.profileIconId);
 
       setLoadingMatches(true);
       const matchesRes = await fetch(`/api/matches?puuid=${summonerData.account.puuid}&region=${finalRegion}`);
@@ -137,7 +137,7 @@ export default function App() {
     setLoadingMatches(true);
     try {
       const filterParam = filter === "all" ? "" : `&queue=${filter}`;
-      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=${start}&count=10${filterParam}`);
+      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=${start}&count=20${filterParam}`);
       if (!res.ok) throw new Error("Erro buscar partidas filtradas");
       const data = await res.json();
       if (isLoadMore) {
@@ -160,7 +160,7 @@ export default function App() {
     setLoadingMatches(true);
     try {
       const filterParam = filter === "all" ? "" : `&queue=${filter}`;
-      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=0&count=10${filterParam}`);
+      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=0&count=20${filterParam}`);
       if (!res.ok) throw new Error("Erro ao buscar partidas filtradas");
       const data = await res.json();
       setMatches(data);
@@ -172,7 +172,7 @@ export default function App() {
   };
 
   const handleLoadMore = () => {
-    const nextStart = matchStart + 10;
+    const nextStart = matchStart + 20;
     setMatchStart(nextStart);
     loadMatches(matchFilter, nextStart, true);
   };
@@ -211,7 +211,7 @@ export default function App() {
   const suggestions = recentSearches.filter(s => 
     s.name.toLowerCase().includes(searchInput.toLowerCase()) || 
     `${s.name}#${s.tag}`.toLowerCase().includes(searchInput.toLowerCase())
-  );
+  ).slice(0, 4);
 
   const isHome = !summoner && !loading && !error && page === "home";
 
@@ -317,7 +317,7 @@ export default function App() {
 
                 
                 <div className="flex-1 overflow-hidden">
-                  <StatsSummary userStats={userStats} targetRank={targetRank} winRate={filteredWinRate} filterLabel={filterLabel} />
+                  <StatsSummary userStats={userStats} targetRank={targetRank} winRate={filteredWinRate} filterLabel={filterLabel} matchCount={matches.length} />
 
                   {matches.length > 0 ? (
                     <MatchHistory 
@@ -341,7 +341,7 @@ export default function App() {
           )}
         </main>
       )}
-      <Footer onNavigate={(p) => setPage(p as any)} />
+      <Footer onNavigate={(p) => setPage(p as any)} isHome={page === "home" && isHome} />
       </div>
     </div>
   );

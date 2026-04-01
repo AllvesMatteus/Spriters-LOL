@@ -8,6 +8,7 @@ interface StatsSummaryProps {
   targetRank: string;
   winRate: number;
   filterLabel?: string;
+  matchCount?: number;
 }
 
 const StatBar: React.FC<{ 
@@ -53,7 +54,7 @@ const StatBar: React.FC<{
   );
 };
 
-export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRank, winRate, filterLabel = "Últimas partidas" }) => {
+export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRank, winRate, filterLabel = "Últimas partidas", matchCount = 20 }) => {
   const targetStats = getAdjustedTargetStats(targetRank, userStats.lane);
 
   const radarData = [
@@ -83,7 +84,7 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRan
       
       
       
-      <div className="flex flex-col items-center justify-center shrink-0 w-full md:w-[150px] relative pt-2">
+      <div className="flex flex-col items-center justify-center shrink-0 w-full md:w-[150px] relative pt-2 group/chart cursor-default">
         <p className="text-[9px] font-black text-[#62636c] mb-4 uppercase tracking-[0.15em] w-full text-center truncate px-2">{filterLabel}</p>
         
         <div className="relative w-24 h-24">
@@ -108,6 +109,10 @@ export const StatsSummary: React.FC<StatsSummaryProps> = ({ userStats, targetRan
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[20px] font-black text-white leading-none tracking-tighter">{winRate}%</span>
             <span className="text-[8px] text-[#62636c] font-black uppercase tracking-tighter mt-1">Win Rate</span>
+          </div>
+
+          <div className="absolute top-[105%] left-[50%] -translate-x-1/2 bg-[#1c1d21]/95 text-[#9e9eb1] text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-lg border border-white/10 shadow-2xl opacity-0 group-hover/chart:opacity-100 transition-opacity duration-300 pointer-events-none z-[100] whitespace-nowrap backdrop-blur-md">
+            Baseado em <span className="text-white font-black">{matchCount}</span> partidas
           </div>
         </div>
       </div>

@@ -78,13 +78,13 @@ export const HomePage: React.FC<HomePageProps> = ({
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full min-h-[calc(100vh-64px)] pt-16 px-4">
+    <div className="flex flex-col items-center justify-center w-full flex-1 pt-6 px-4 pb-8">
       
-      <div className="relative w-full max-w-[600px] mb-8 flex flex-col items-center justify-center gap-4">
+      <div className="relative w-full max-w-[600px] mb-6 flex flex-col items-center justify-center gap-4">
         <img 
           src={logo} 
           alt="Spriters LOL" 
-          className="h-[140px] w-auto object-contain drop-shadow-[0_0_40px_rgba(76,146,252,0.25)] select-none" 
+          className="h-[110px] w-auto object-contain drop-shadow-[0_0_40px_rgba(76,146,252,0.25)] select-none" 
         />
         <p className="text-[#9e9eb1] font-bold tracking-widest uppercase text-sm">Estatísticas do League of Legends</p>
       </div>
@@ -154,13 +154,22 @@ export const HomePage: React.FC<HomePageProps> = ({
                     handleSearch(undefined, s.name, s.tag, s.region);
                   }}
                 >
-                  <span className="text-[15px] font-bold text-[#e1e1e1]">
-                    {s.name} <span className="text-[#9e9eb1]">#{s.tag}</span>
-                  </span>
                   <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-bold bg-[#313237] text-[#9e9eb1] px-2 py-1 rounded-md group-hover:bg-[#1c1d21]">
-                      {s.region.toUpperCase()}
-                    </span>
+                    {s.profileIconId ? (
+                      <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/profileicon/${s.profileIconId}.png`} className="w-10 h-10 rounded-full border border-black/50 shadow-md" alt="" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-black/20 border border-black/50 shadow-md flex items-center justify-center">
+                         <span className="text-[12px] text-[#9e9eb1]">?</span>
+                      </div>
+                    )}
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className="text-[15px] font-bold text-[#e1e1e1]">
+                        {s.name} <span className="text-[#9e9eb1] font-medium">#{s.tag}</span>
+                      </span>
+                      <span className="text-[11px] font-bold text-[#62636c] uppercase tracking-widest">{s.region}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -193,8 +202,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       </div>
 
       
-      <div className="w-full max-w-[700px] mt-12">
-        <div className="flex items-center justify-between mb-3 px-2">
+      <div className="w-full max-w-[700px] mt-8">
+        <div className="flex items-center justify-between mb-2.5 px-2">
           <h3 className="text-[14px] font-bold"><span className="text-[#3aa99a]">NOTAS</span> de Atualização</h3>
           <a href="https://www.leagueoflegends.com/pt-br/news/tags/patch-notes/" target="_blank" rel="noreferrer" className="text-[12px] text-[#9e9eb1] hover:text-white transition-colors">Mais &gt;</a>
         </div>
@@ -206,14 +215,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                 href={patch.url}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-between px-6 py-4 border-b border-white/5 hover:bg-white/5 transition-colors last:border-b-0"
+                className="flex items-center justify-between px-6 py-3 border-b border-white/5 hover:bg-white/5 transition-colors last:border-b-0"
               >
-                <span className="text-[14px] font-medium text-[#e1e1e1]">{patch.title}</span>
-                <span className="text-[12px] text-[#9e9eb1] capitalize">{patch.date}</span>
+                <span className="text-[13.5px] font-medium text-[#e1e1e1]">{patch.title}</span>
+                <span className="text-[11px] text-[#9e9eb1] capitalize">{patch.date}</span>
               </a>
             );
           }) : (
-            <div className="px-6 py-4 text-[13px] text-[#9e9eb1]">Carregando notas...</div>
+            <div className="px-6 py-3 text-[13px] text-[#9e9eb1]">Carregando notas...</div>
           )}
         </div>
       </div>

@@ -2,11 +2,12 @@ import React from "react";
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
+  isHome?: boolean;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigate, isHome }) => {
   return (
-    <footer className="w-full mt-24 pb-8 text-center text-[#9e9eb1]">
+    <footer className={`w-full ${isHome ? 'mt-4' : 'mt-24'} pb-8 text-center text-[#9e9eb1]`}>
       <div className="flex flex-wrap justify-center items-center gap-6 text-[12px] font-bold mb-4">
         <button
           onClick={() => onNavigate?.("privacy")}

@@ -449,33 +449,37 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                 </div>
 
                 
-                <div className="flex w-full items-end justify-between mt-3 gap-1">
-                  <div className="flex flex-col items-start shrink-0">
-                    <span className="text-[7.5px] font-black text-[#9e9eb1] uppercase tracking-[0.05em] mb-0.5 opacity-60">Score</span>
-                    <div className={cn(
-                      "px-1.5 py-1 rounded border flex flex-col items-center justify-center min-w-[32px] shadow-lg",
-                      (calculateAIScore(p, match).score / 10) >= 8 ? "bg-[#5de8c8]/20 border-[#5de8c8]/40 text-[#5de8c8]" :
-                      (calculateAIScore(p, match).score / 10) >= 6 ? "bg-[#f0ba65]/20 border-[#f0ba65]/40 text-[#f0ba65]" :
-                      "bg-white/5 border-white/10 text-white"
-                    )}>
-                      <span className="text-[12px] md:text-[13px] font-black leading-none tracking-tighter">{(calculateAIScore(p, match).score / 10).toFixed(1)}</span>
+                <div className="flex flex-col w-full mt-3">
+                  <span className="text-[7.5px] font-black text-[#9e9eb1] uppercase tracking-[0.05em] mb-1 opacity-60">Score</span>
+                  <div className="flex items-start gap-2">
+                    
+                    {/* Score Rating Box */}
+                    <div className="flex flex-col items-center shrink-0">
+                      <div className={cn(
+                        "w-[34px] h-[22px] rounded border flex items-center justify-center shadow-lg transition-colors",
+                        (calculateAIScore(p, match).score / 10) >= 8 ? "bg-[#5de8c8]/20 border-[#5de8c8]/40 text-[#5de8c8]" :
+                        (calculateAIScore(p, match).score / 10) >= 6 ? "bg-[#f0ba65]/20 border-[#f0ba65]/40 text-[#f0ba65]" :
+                        "bg-white/5 border-white/10 text-white"
+                      )}>
+                        <span className="text-[12px] md:text-[13px] font-black leading-none tracking-tighter">{(calculateAIScore(p, match).score / 10).toFixed(1)}</span>
+                      </div>
+                      {myRank > 0 && <span className="text-[7px] font-black text-[#9e9eb1] uppercase mt-1 opacity-70 whitespace-nowrap">#{myRank} Rank</span>}
                     </div>
-                    {myRank > 0 && <span className="text-[7px] font-black text-[#9e9eb1] uppercase mt-1 opacity-70 whitespace-nowrap">#{myRank} Rank</span>}
-                  </div>
 
-                  {statusBadge ? (
-                    <div className={cn(
-                      "w-[26px] h-[22px] mb-2.5 rounded flex items-center justify-center border shadow-xl relative overflow-hidden shrink-0",
-                      isMVP ? "bg-[#f0ba65] border-[#c8aa6e]" : "bg-[#8b5bd3] border-[#62468f]"
-                    )}>
-                      <div className="absolute inset-x-0 top-0 h-[35%] bg-white/20" />
-                      <span className={cn("text-[7.5px] font-black tracking-tighter", isMVP ? "text-[#1a1200]" : "text-white")}>
-                        {statusBadge}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className="flex-1" />
-                  )}
+                    {/* MVP / ACE Badge */}
+                    {statusBadge && (
+                      <div className={cn(
+                        "w-[34px] h-[22px] rounded flex items-center justify-center border shadow-xl relative overflow-hidden shrink-0",
+                        isMVP ? "bg-[#f0ba65] border-[#c8aa6e]" : "bg-[#8b5bd3] border-[#62468f]"
+                      )}>
+                        <div className="absolute inset-x-0 top-0 h-[35%] bg-white/20 pointer-events-none" />
+                        <span className={cn("text-[9px] md:text-[10px] font-black tracking-tighter", isMVP ? "text-[#1a1200]" : "text-white")}>
+                          {statusBadge}
+                        </span>
+                      </div>
+                    )}
+                    
+                  </div>
                 </div>
               </div>
 

@@ -1,4 +1,4 @@
-import { MatchData, SummonerData, RankStats, RANK_AVERAGES } from "../types";
+import { MatchData, SummonerData, RankStats, RANK_AVERAGES, PerformanceScores, MatchPerformanceData, OverallPerformanceData, RANKS_POINTS } from "../types";
 
 export const getWinRate = (data?: any) => {
   if (!data) return 0;
@@ -261,4 +261,223 @@ export const getQueueType = (queueId: number, gameMode: string): string => {
     case 1700: return "Arena";
     default: return gameMode === "CLASSIC" ? "Normal" : gameMode;
   }
+};
+
+export const calculateMatchPerformanceScores = (p: any, match: MatchData): PerformanceScores => {
+  const durationMin = Math.max(1, match.info.gameDuration / 60);
+  const cspm = (p.totalMinionsKilled + p.neutralMinionsKilled) / durationMin;
+  const gpm = p.goldEarned / durationMin;
+
+  const teamParticipants = match.info.participants.filter((part) => part.teamId === p.teamId);
+  const teamKills = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.kills, 0));
+  const teamDamage = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageDealtToChampions, 0));
+  const teamGold = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.goldEarned, 0));
+
+  const kp = (p.kills + p.assists) / teamKills;
+  const damageShare = p.totalDamageDealtToChampions / teamDamage;
+  const goldShare = p.goldEarned / teamGold;
+  const kdaRatio = (p.kills + p.assists) / Math.max(1, p.deaths);
+  const visionpm = p.visionScore / durationMin;
+
+  // 1. Laning Score (Dominance)
+  let laning = 1000;
+  if (p.firstBloodKill) laning += 300;
+  laning += Math.min(600, p.kills * 150);
+  laning -= Math.min(500, p.deaths * 100);
+  laning += (cspm - 6) * 150;
+  laning = Math.min(2500, Math.max(300, laning));
+
+  // 2. Farming Score (Efficiency)
+  let farming = (cspm * 180) + (gpm * 1.5);
+  if (p.teamPosition === "UTILITY" || p.individualPosition === "UTILITY") {
+    farming = (cspm * 450) + (gpm * 3.5) + (p.visionScore * 12);
+  }
+  farming = Math.min(2500, Math.max(300, farming));
+
+  // 3. Objectives Score (Contribution)
+  const objDmgPm = (p.damageDealtToObjectives || 0) / durationMin;
+  let objectives = 800 + (objDmgPm * 1.5) + ((p.turretKills || 0) * 250) + ((p.turretTakedowns || p.turretKills || 0) * 125);
+  objectives = Math.min(2500, Math.max(300, objectives));
+
+  // 4. Combat Score (Effectiveness)
+  let combat = 600 + (kdaRatio * 150) + (p.kills * 120);
+  if (p.doubleKills > 0) combat += 100;
+  if (p.tripleKills > 0) combat += 200;
+  if (p.quadraKills > 0) combat += 400;
+  if (p.pentaKills > 0) combat += 800;
+  combat = Math.min(2500, Math.max(300, combat));
+
+  // 5. Teamfight Score (Contribution)
+  let teamfight = 500 + (kp * 1800) + (damageShare * 1000);
+  if (p.teamPosition === "TOP" || p.teamPosition === "JUNGLE" || p.individualPosition === "TOP" || p.individualPosition === "JUNGLE") {
+    const teamDmgTaken = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageTaken, 0));
+    const dmgTakenShare = p.totalDamageTaken / teamDmgTaken;
+    teamfight += (dmgTakenShare * 500);
+  }
+  teamfight = Math.min(2500, Math.max(300, teamfight));
+
+  // 6. Vision Score (Control)
+  let vision = (visionpm * 800) + ((p.visionWardsBoughtInGame || 0) * 150) + ((p.wardsPlaced || 0) * 20) + ((p.wardsKilled || 0) * 40);
+  if (p.teamPosition === "UTILITY" || p.individualPosition === "UTILITY") {
+    vision = (visionpm * 500) + ((p.visionWardsBoughtInGame || 0) * 80) + ((p.wardsPlaced || 0) * 15) + ((p.wardsKilled || 0) * 25);
+  }
+  vision = Math.min(2500, Math.max(300, vision));
+
+  const total = Math.round((laning + farming + objectives + combat + teamfight + vision) / 6);
+
+  return { laning, farming, objectives, combat, teamfight, vision, total };
+};
+
+export const calculatePerformanceRank = (
+  n: number,
+  r: number,
+  currentTier: string,
+  currentRank: string
+): { tier: string; rank: string; points: number } => {
+  const upperTier = currentTier?.toUpperCase() || "UNRANKED";
+  const upperRank = currentRank?.toUpperCase() || "I";
+
+  if (upperTier === "UNRANKED") {
+    return { tier: "UNRANKED", rank: "", points: 0 };
+  }
+
+  const rankIdx = RANKS_POINTS.findIndex(x => x.tier === upperTier && (upperTier === "MASTER" || upperTier === "GRANDMASTER" || upperTier === "CHALLENGER" || x.rank === upperRank));
+  const basePoints = rankIdx !== -1 ? RANKS_POINTS[rankIdx].points : 6000;
+
+  let t = 0;
+  if (r > 2100) {
+    t = 6000;
+  } else if (r > 1900) {
+    t = 5000;
+  } else if (r > 1700) {
+    t = 4500;
+  } else if (r < 899) {
+    if (n >= 0.9 && n < 1.0) t = 4000;
+    else if (n >= 0.8 && n < 0.9) t = 5000;
+    else if (n < 0.8) t = 6000;
+    else t = 4000;
+  } else if (r < 1299) {
+    if (n >= 0.9 && n <= 1.0) t = 3000;
+    else t = 4000;
+  } else {
+    if (n > 0.9 && n < 1.0) t = 2000;
+    else if (n > 0.8 && n < 0.9) t = 3000;
+    else t = 4000;
+  }
+
+  const offset = Math.round(n * t) - t;
+  const points = basePoints + offset;
+
+  if (points <= 0) return { tier: "IRON", rank: "IV", points: points };
+  if (points >= 16000) return { tier: "CHALLENGER", rank: "I", points: points };
+
+  const rounded = 500 * Math.round(points / 500);
+  const matched = RANKS_POINTS.find(x => x.points >= rounded) || RANKS_POINTS[RANKS_POINTS.length - 1];
+
+  return { tier: matched.tier, rank: matched.rank, points };
+};
+
+export const calculateOverallPerformanceData = (
+  matches: MatchData[],
+  summoner: SummonerData,
+  currentTier: string,
+  currentRank: string
+): OverallPerformanceData | null => {
+  if (!matches.length || !summoner) return null;
+
+  const myPuuid = summoner.account.puuid;
+  const history: MatchPerformanceData[] = [];
+
+  matches.forEach((match) => {
+    const playerPart = match.info.participants.find(p => p.puuid === myPuuid);
+    if (!playerPart) return;
+
+    const scores = calculateMatchPerformanceScores(playerPart, match);
+
+    const teammates = match.info.participants.filter(p => p.teamId === playerPart.teamId && p.puuid !== myPuuid);
+    const teamAverageScore = teammates.length > 0
+      ? Math.round(teammates.reduce((acc, p) => acc + calculateMatchPerformanceScores(p, match).total, 0) / teammates.length)
+      : scores.total;
+
+    const enemies = match.info.participants.filter(p => p.teamId !== playerPart.teamId);
+    const enemyAverageScore = enemies.length > 0
+      ? Math.round(enemies.reduce((acc, p) => acc + calculateMatchPerformanceScores(p, match).total, 0) / enemies.length)
+      : scores.total;
+
+    history.push({
+      matchId: match.metadata.matchId,
+      championName: playerPart.championName,
+      kda: { k: playerPart.kills, d: playerPart.deaths, a: playerPart.assists },
+      win: playerPart.win,
+      gameDuration: match.info.gameDuration,
+      gameCreation: match.info.gameCreation || Date.now(),
+      pos: playerPart.teamPosition || playerPart.individualPosition || "UNKNOWN",
+      scores,
+      teamAverageScore,
+      enemyAverageScore
+    });
+  });
+
+  if (!history.length) return null;
+
+  const playerAverage = {
+    laning: Math.round(history.reduce((acc, m) => acc + m.scores.laning, 0) / history.length),
+    farming: Math.round(history.reduce((acc, m) => acc + m.scores.farming, 0) / history.length),
+    objectives: Math.round(history.reduce((acc, m) => acc + m.scores.objectives, 0) / history.length),
+    combat: Math.round(history.reduce((acc, m) => acc + m.scores.combat, 0) / history.length),
+    teamfight: Math.round(history.reduce((acc, m) => acc + m.scores.teamfight, 0) / history.length),
+    vision: Math.round(history.reduce((acc, m) => acc + m.scores.vision, 0) / history.length),
+    total: Math.round(history.reduce((acc, m) => acc + m.scores.total, 0) / history.length)
+  };
+
+  const teamAverage = Math.round(history.reduce((acc, m) => acc + m.teamAverageScore, 0) / history.length);
+  const enemyAverage = Math.round(history.reduce((acc, m) => acc + m.enemyAverageScore, 0) / history.length);
+
+  let pointList: number[] = [];
+  history.forEach((m) => {
+    const matchRank = calculatePerformanceRank(m.scores.total / Math.max(1, m.teamAverageScore), m.scores.total, currentTier, currentRank);
+    pointList.push(matchRank.points);
+  });
+
+  pointList.sort((a, b) => b - a);
+
+  let overallPoints = 0;
+  const tier = currentTier?.toUpperCase() || "UNRANKED";
+
+  if (tier !== "UNRANKED") {
+    const pct = ((playerAverage.total - teamAverage) / Math.max(1, teamAverage)) * 100;
+    if (pct > 15 && pointList.length > 3) {
+      pointList = pointList.slice(0, -2);
+    }
+    overallPoints = Math.round(pointList.reduce((acc, val) => acc + val, 0) / pointList.length);
+    if (pct > 0) {
+      overallPoints += (pct / 10) * 500;
+    }
+  }
+
+  if (overallPoints >= 16000) overallPoints = 16000;
+  if (overallPoints <= 0) overallPoints = 1;
+  if (tier === "UNRANKED") overallPoints = 0;
+
+  let finalTier = "UNRANKED";
+  let finalRankStr = "";
+
+  if (tier !== "UNRANKED") {
+    const rounded = Math.min(16000, Math.max(0, 500 * Math.round(overallPoints / 500)));
+    const matched = RANKS_POINTS.find(x => x.points === rounded) || RANKS_POINTS[0];
+    finalTier = matched.tier;
+    finalRankStr = matched.rank;
+  }
+
+  return {
+    playerAverage,
+    teamAverage,
+    enemyAverage,
+    history,
+    performanceRank: {
+      tier: finalTier,
+      rank: finalRankStr,
+      points: overallPoints
+    }
+  };
 };

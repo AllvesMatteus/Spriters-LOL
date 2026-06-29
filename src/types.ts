@@ -35,6 +35,8 @@ export interface MatchData {
     gameDuration: number;
     gameMode: string;
     queueId: number;
+    gameCreation?: number;
+    gameEndTimestamp?: number;
     participants: Array<{
       puuid: string;
       summonerName: string;
@@ -119,3 +121,78 @@ export const RANK_AVERAGES: Record<string, RankStats> = {
   GRANDMASTER: { tier: "GRANDMASTER", displayName: "GRÃO-MESTRE", csPerMin: 9.2, kda: 3.7, visionScore: 50, damagePerMin: 800 },
   CHALLENGER: { tier: "CHALLENGER", displayName: "DESAFIANTE", csPerMin: 9.5, kda: 4.0, visionScore: 55, damagePerMin: 850 },
 };
+
+export interface PerformanceScores {
+  laning: number;
+  farming: number;
+  objectives: number;
+  combat: number;
+  teamfight: number;
+  vision: number;
+  total: number;
+}
+
+export interface MatchPerformanceData {
+  matchId: string;
+  championName: string;
+  kda: { k: number; d: number; a: number };
+  win: boolean;
+  gameDuration: number;
+  gameCreation: number;
+  pos: string;
+  scores: PerformanceScores;
+  teamAverageScore: number;
+  enemyAverageScore: number;
+}
+
+export interface OverallPerformanceData {
+  playerAverage: PerformanceScores;
+  teamAverage: number;
+  enemyAverage: number;
+  history: MatchPerformanceData[];
+  performanceRank: {
+    tier: string;
+    rank: string;
+    points: number;
+  };
+}
+
+export interface RankPointInfo {
+  tier: string;
+  rank: string;
+  points: number;
+}
+
+export const RANKS_POINTS: RankPointInfo[] = [
+  { tier: "IRON", rank: "IV", points: 0 },
+  { tier: "IRON", rank: "III", points: 500 },
+  { tier: "IRON", rank: "II", points: 1000 },
+  { tier: "IRON", rank: "I", points: 1500 },
+  { tier: "BRONZE", rank: "IV", points: 2000 },
+  { tier: "BRONZE", rank: "III", points: 2500 },
+  { tier: "BRONZE", rank: "II", points: 3000 },
+  { tier: "BRONZE", rank: "I", points: 3500 },
+  { tier: "SILVER", rank: "IV", points: 4000 },
+  { tier: "SILVER", rank: "III", points: 4500 },
+  { tier: "SILVER", rank: "II", points: 5000 },
+  { tier: "SILVER", rank: "I", points: 5500 },
+  { tier: "GOLD", rank: "IV", points: 6000 },
+  { tier: "GOLD", rank: "III", points: 6500 },
+  { tier: "GOLD", rank: "II", points: 7000 },
+  { tier: "GOLD", rank: "I", points: 7500 },
+  { tier: "PLATINUM", rank: "IV", points: 8000 },
+  { tier: "PLATINUM", rank: "III", points: 8500 },
+  { tier: "PLATINUM", rank: "II", points: 9000 },
+  { tier: "PLATINUM", rank: "I", points: 9500 },
+  { tier: "EMERALD", rank: "IV", points: 10000 },
+  { tier: "EMERALD", rank: "III", points: 10500 },
+  { tier: "EMERALD", rank: "II", points: 11000 },
+  { tier: "EMERALD", rank: "I", points: 11500 },
+  { tier: "DIAMOND", rank: "IV", points: 12000 },
+  { tier: "DIAMOND", rank: "III", points: 12500 },
+  { tier: "DIAMOND", rank: "II", points: 13000 },
+  { tier: "DIAMOND", rank: "I", points: 13500 },
+  { tier: "MASTER", rank: "I", points: 14000 },
+  { tier: "GRANDMASTER", rank: "I", points: 15000 },
+  { tier: "CHALLENGER", rank: "I", points: 16000 }
+];

@@ -408,6 +408,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
         return (
           <div
             key={match.metadata.matchId}
+            id={`match-container-${match.metadata.matchId}`}
             className={cn(
                "group relative rounded-[20px] mb-3 transition-all duration-500 overflow-hidden",
                "backdrop-blur-[24px] saturate-[120%] border",

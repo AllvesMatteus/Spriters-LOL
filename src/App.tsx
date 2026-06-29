@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { SummonerData, MatchData } from "./types";
-import { calculateUserStats, getStreak, getWinRate, getInitialTargetRank } from "./utils/helpers";
+import { calculateUserStats, getStreak, getWinRate, getInitialTargetRank, calculateOverallPerformanceData } from "./utils/helpers";
 import { Header } from "./components/Header";
 import { ProfileCard } from "./components/ProfileCard";
 import { RankCard } from "./components/RankCard";
@@ -13,6 +13,7 @@ import { SidebarTabs } from "./components/SidebarTabs";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { ContactPage } from "./components/ContactPage";
 import { Footer } from "./components/Footer";
+import { PerformanceOverview } from "./components/PerformanceOverview";
 
 const REGIONS = [
   { id: "br1", name: "Brasil" },
@@ -203,6 +204,16 @@ export default function App() {
     return Math.round((wins / matches.length) * 100);
   })();
 
+  const performanceData = React.useMemo(() => {
+    if (!summoner || matches.length === 0) return null;
+    return calculateOverallPerformanceData(
+      matches,
+      summoner,
+      soloData?.tier || "UNRANKED",
+      soloData?.rank || "I"
+    );
+  }, [matches, summoner, soloData?.tier, soloData?.rank]);
+
   const filterLabel = matchFilter === "all" ? "Últimas partidas" :
     matchFilter === "420" ? "Ranqueada Solo" :
     matchFilter === "440" ? "Ranqueada Flex" :
@@ -292,7 +303,7 @@ export default function App() {
               <div className="flex flex-col lg:flex-row gap-2 mt-4">
                 
                 <div className="lg:w-[320px] shrink-0">
-                  <RankCard soloData={soloData} flexData={flexData} />
+                  <RankCard soloData={soloData} flexData={flexData} performanceRank={performanceData?.performanceRank} />
                   
                   
                   <ImprovementTips 
@@ -307,10 +318,10 @@ export default function App() {
                   
                   {matches.length > 0 && (
                     <SidebarTabs 
-                      matches={matches} 
-                      puuid={summoner.account.puuid}
-                      region={region}
-                      onPlayerClick={(gameName, tagLine) => handleSearch(undefined, gameName, tagLine, region)}
+                       matches={matches} 
+                       puuid={summoner.account.puuid}
+                       region={region}
+                       onPlayerClick={(gameName, tagLine) => handleSearch(undefined, gameName, tagLine, region)}
                     />
                   )}
                 </div>
@@ -318,6 +329,10 @@ export default function App() {
                 
                 <div className="flex-1 overflow-hidden">
                   <StatsSummary userStats={userStats} targetRank={targetRank} winRate={filteredWinRate} filterLabel={filterLabel} matchCount={matches.length} />
+
+                  {performanceData && (
+                    <PerformanceOverview performanceData={performanceData} />
+                  )}
 
                   {matches.length > 0 ? (
                     <MatchHistory 

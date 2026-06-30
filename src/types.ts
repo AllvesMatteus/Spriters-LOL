@@ -105,21 +105,24 @@ export interface RankStats {
   csPerMin: number;
   kda: number;
   visionScore: number;
+  visionPerMin: number;
   damagePerMin: number;
+  goldPerMin: number;
+  kp: number;
   lane?: string;
 }
 
 export const RANK_AVERAGES: Record<string, RankStats> = {
-  IRON: { tier: "IRON", displayName: "FERRO", csPerMin: 4.5, kda: 1.8, visionScore: 10, damagePerMin: 400 },
-  BRONZE: { tier: "BRONZE", displayName: "BRONZE", csPerMin: 5.2, kda: 2.1, visionScore: 15, damagePerMin: 450 },
-  SILVER: { tier: "SILVER", displayName: "PRATA", csPerMin: 5.8, kda: 2.3, visionScore: 20, damagePerMin: 500 },
-  GOLD: { tier: "GOLD", displayName: "OURO", csPerMin: 6.5, kda: 2.5, visionScore: 25, damagePerMin: 550 },
-  PLATINUM: { tier: "PLATINUM", displayName: "PLATINA", csPerMin: 7.2, kda: 2.8, visionScore: 30, damagePerMin: 600 },
-  EMERALD: { tier: "EMERALD", displayName: "ESMERALDA", csPerMin: 7.8, kda: 3.0, visionScore: 35, damagePerMin: 650 },
-  DIAMOND: { tier: "DIAMOND", displayName: "DIAMANTE", csPerMin: 8.5, kda: 3.2, visionScore: 40, damagePerMin: 700 },
-  MASTER: { tier: "MASTER", displayName: "MESTRE", csPerMin: 9.0, kda: 3.5, visionScore: 45, damagePerMin: 750 },
-  GRANDMASTER: { tier: "GRANDMASTER", displayName: "GRÃO-MESTRE", csPerMin: 9.2, kda: 3.7, visionScore: 50, damagePerMin: 800 },
-  CHALLENGER: { tier: "CHALLENGER", displayName: "DESAFIANTE", csPerMin: 9.5, kda: 4.0, visionScore: 55, damagePerMin: 850 },
+  IRON: { tier: "IRON", displayName: "FERRO", csPerMin: 4.0, kda: 1.5, visionScore: 10, visionPerMin: 0.4, damagePerMin: 350, goldPerMin: 300, kp: 35 },
+  BRONZE: { tier: "BRONZE", displayName: "BRONZE", csPerMin: 4.5, kda: 1.8, visionScore: 12, visionPerMin: 0.5, damagePerMin: 400, goldPerMin: 330, kp: 40 },
+  SILVER: { tier: "SILVER", displayName: "PRATA", csPerMin: 5.2, kda: 2.1, visionScore: 15, visionPerMin: 0.7, damagePerMin: 450, goldPerMin: 360, kp: 43 },
+  GOLD: { tier: "GOLD", displayName: "OURO", csPerMin: 6.0, kda: 2.4, visionScore: 18, visionPerMin: 0.9, damagePerMin: 500, goldPerMin: 390, kp: 45 },
+  PLATINUM: { tier: "PLATINUM", displayName: "PLATINA", csPerMin: 6.5, kda: 2.6, visionScore: 22, visionPerMin: 1.1, damagePerMin: 550, goldPerMin: 410, kp: 47 },
+  EMERALD: { tier: "EMERALD", displayName: "ESMERALDA", csPerMin: 7.2, kda: 2.8, visionScore: 25, visionPerMin: 1.3, damagePerMin: 620, goldPerMin: 430, kp: 50 },
+  DIAMOND: { tier: "DIAMOND", displayName: "DIAMANTE", csPerMin: 7.8, kda: 3.0, visionScore: 30, visionPerMin: 1.5, damagePerMin: 680, goldPerMin: 450, kp: 52 },
+  MASTER: { tier: "MASTER", displayName: "MESTRE", csPerMin: 8.5, kda: 3.2, visionScore: 35, visionPerMin: 1.7, damagePerMin: 750, goldPerMin: 470, kp: 54 },
+  GRANDMASTER: { tier: "GRANDMASTER", displayName: "GRÃO-MESTRE", csPerMin: 9.0, kda: 3.4, visionScore: 40, visionPerMin: 1.9, damagePerMin: 800, goldPerMin: 490, kp: 56 },
+  CHALLENGER: { tier: "CHALLENGER", displayName: "DESAFIANTE", csPerMin: 9.5, kda: 3.6, visionScore: 45, visionPerMin: 2.1, damagePerMin: 850, goldPerMin: 510, kp: 58 },
 };
 
 export interface PerformanceScores {

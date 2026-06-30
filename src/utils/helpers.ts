@@ -1,4 +1,5 @@
 import { MatchData, SummonerData, RankStats, RANK_AVERAGES, PerformanceScores, MatchPerformanceData, OverallPerformanceData, RANKS_POINTS } from "../types";
+import { computePerformanceRank, MatchDataInput, Position } from "./performanceEngine";
 
 export const getWinRate = (data?: any) => {
   if (!data) return 0;
@@ -94,6 +95,9 @@ export const calculateUserStats = (matches: MatchData[], summoner: SummonerData 
     kda: Number(((totalKills + totalAssists) / Math.max(1, totalDeaths)).toFixed(2)),
     visionScore: Number((totalVision / games).toFixed(1)),
     damagePerMin: Number((totalDamage / durationMin).toFixed(1)),
+    visionPerMin: Number((totalVision / durationMin).toFixed(1)), // Estimated
+    goldPerMin: 0, // Fallback if no gold data in aggregate
+    kp: 0, // Fallback
     lane: mainLane !== "UNKNOWN" ? mainLane : undefined
   };
 };
@@ -130,114 +134,64 @@ export const SPELL_ICONS: Record<number, string> = {
 export const calculateAIScore = (p: any, match: MatchData): { score: number; isMVP: boolean } => {
   const teamParticipants = match.info.participants.filter((part) => part.teamId === p.teamId);
   const teamKills    = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.kills, 0));
-  const teamDamage   = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageDealtToChampions, 0));
-  const teamGold     = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.goldEarned, 0));
-
-  const kp           = (p.kills + p.assists) / teamKills;
-  const damageShare  = p.totalDamageDealtToChampions / teamDamage;
-  const goldShare    = p.goldEarned / teamGold;
+  
+  const kp           = ((p.kills + p.assists) / teamKills) * 100;
+  const kdaRatio     = (p.kills + p.assists) / Math.max(1, p.deaths);
   const durationMin  = Math.max(1, match.info.gameDuration / 60);
   const cspm         = (p.totalMinionsKilled + p.neutralMinionsKilled) / durationMin;
   const visionpm     = p.visionScore / durationMin;
+  const dpm          = p.totalDamageDealtToChampions / durationMin;
+  const gpm          = p.goldEarned / durationMin;
 
-  // Use teamPosition as primary (authoritative Riot API v5 field for 5-player ranked role)
-  // Falls back to individualPosition only if teamPosition is empty or INVALID
   const position = (p.teamPosition && p.teamPosition !== "" && p.teamPosition !== "Invalid")
     ? p.teamPosition
     : p.individualPosition;
 
-  const isSupport = position === "UTILITY";
-  const isJungler = position === "JUNGLE";
-  const isTop     = position === "TOP";
-  const isMid     = position === "MIDDLE";
-  const isAdc     = position === "BOTTOM";
+  // We use Platinum as a standard baseline to score against for the "OP Score", 
+  // since a Platinum performance is generally considered "good" (6-7/10).
+  const baseline = RANK_AVERAGES.PLATINUM || RANK_AVERAGES.GOLD; 
 
   let score = 0;
+  
+  // Percentile calculation helper (caps at 1.5x of baseline to avoid inflating too much)
+  const scoreMetric = (val: number, base: number, weight: number) => {
+     const ratio = Math.min(1.5, Math.max(0, val / Math.max(0.1, base)));
+     return ratio * weight;
+  };
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [1] KDA EFFICIENCY — 28 pts max
-  //     Perfect KDA 10:0 = 28 pts; 2:1 = ~12 pts; 0:5 = 0 pts
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const kdaRatio = (p.kills + p.assists) / Math.max(1, p.deaths);
-  score += Math.min(28, kdaRatio * 4.5);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [2] KILL PARTICIPATION — 22 pts max
-  //     100% KP = 22 pts | carry games tend to have 60-80%
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  score += Math.min(22, kp * 35);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [3] DAMAGE EFFICIENCY — 15 pts max
-  //     Rewards dealing MORE damage than the gold they used
-  //     A player with 20% team damage using 15% team gold → ratio 1.33 → good
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const dmgEff = damageShare / Math.max(0.05, goldShare);
-  score += Math.min(15, dmgEff * 9);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [4] VISION CONTROL — 10 pts max
-  //     visionScore/min + control wards bought
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  score += Math.min(6, visionpm * 5);
-  score += Math.min(4, (p.visionWardsBoughtInGame || 0) * 1.0);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [5] OBJECTIVES & STRUCTURES — 10 pts max
-  //     damageDealtToObjectives includes Dragons, Baron, Rift Herald, Towers, Inhibitors
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  const objPerMin = (p.damageDealtToObjectives || 0) / durationMin;
-  score += Math.min(7, objPerMin / 40);
-  score += Math.min(3, (p.turretKills || 0) * 1.5);
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [6] ROLE-SPECIFIC BONUS — 10 pts max
-  //     Each role has a unique primary metric rewarded here
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  if (isSupport) {
-    // Supports: CC Time (timeCCingOthers = seconds applied to enemies) + Healing/Shielding
-    const ccPerMin = (p.timeCCingOthers || 0) / durationMin;
-    score += Math.min(6, ccPerMin * 6);
-    const healShield = ((p.totalHealsOnTeammates || 0) + (p.totalDamageShieldedOnTeammates || 0)) / (durationMin * 80);
-    score += Math.min(4, healShield);
-  } else if (isJungler) {
-    // Junglers: Objective control (Dragon/Baron/Herald dmg) + kill impact on map
-    const jgObjPerMin = (p.damageDealtToObjectives || 0) / durationMin;
-    score += Math.min(6, jgObjPerMin / 30);
-    score += Math.min(4, (p.kills * 0.8)); // Junglers carry via good pathing → kills are indicative
-  } else if (isTop) {
-    // Top: Split push + Team fight trade (damage taken shows commitment)
-    score += Math.min(6, cspm * 0.8);
-    score += Math.min(4, (p.damageDealtToTurrets || 0) / (durationMin * 300));
-  } else if (isMid) {
-    // Mid: High damage output + roaming (shows in KP) — cspm + damage
-    score += Math.min(5, cspm * 0.6);
-    score += Math.min(5, damageShare * 20);
-  } else if (isAdc) {
-    // ADC: Primary carry — CS efficiency and damage concentration
-    score += Math.min(6, cspm * 0.8);
-    score += Math.min(4, damageShare * 15);
+  if (position === "UTILITY") {
+    // Support weights: Vision 35%, KP 30%, KDA 20%, Gold/Min 15%
+    score += scoreMetric(visionpm, baseline.visionPerMin * 1.5, 35);
+    score += scoreMetric(kp, baseline.kp * 1.2, 30);
+    score += scoreMetric(kdaRatio, baseline.kda * 1.2, 20);
+    score += scoreMetric(gpm, baseline.goldPerMin * 0.7, 15);
+  } else if (position === "JUNGLE") {
+    // Jungle weights: KP 30%, GPM 25%, KDA 25%, Vision 20%
+    score += scoreMetric(kp, baseline.kp * 1.1, 30);
+    score += scoreMetric(gpm, baseline.goldPerMin * 1.0, 25);
+    score += scoreMetric(kdaRatio, baseline.kda, 25);
+    score += scoreMetric(visionpm, baseline.visionPerMin, 20);
   } else {
-    // Unknown position fallback
-    score += Math.min(10, cspm * 0.8);
+    // Laners: CS/M 30%, DPM 25%, KDA 25%, KP 20%
+    score += scoreMetric(cspm, baseline.csPerMin, 30);
+    score += scoreMetric(dpm, baseline.damagePerMin, 25);
+    score += scoreMetric(kdaRatio, baseline.kda, 25);
+    score += scoreMetric(kp, baseline.kp, 20);
   }
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [7] MULTI-KILL BONUSES — max +10
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  if (p.pentaKills > 0)       score += 10;
-  else if (p.quadraKills > 0) score += 6;
-  else if (p.tripleKills > 0) score += 3;
-  else if (p.doubleKills > 0) score += 1;
+  // Multi-kill bonus
+  if (p.pentaKills > 0) score += 10;
+  else if (p.quadraKills > 0) score += 5;
 
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // [8] FEEDING PENALTY — excessive deaths drag the team down
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  if (p.deaths > 7) {
-    score -= (p.deaths - 7) * 2.5;
-  }
+  // Death penalty
+  if (p.deaths > 8) score -= (p.deaths - 8) * 2;
+  
+  // Win bonus
+  if (p.win) score += 5;
 
-  score = Math.min(100, Math.max(0, score));
+  // Scale to 0-100 (OP Score style: 80+ is MVP range, 60+ is good)
+  score = Math.min(100, Math.max(0, score * 0.85)); // 0.85 multiplier to make 100 rare
+
   return { score, isMVP: false };
 };
 
@@ -264,117 +218,63 @@ export const getQueueType = (queueId: number, gameMode: string): string => {
 };
 
 export const calculateMatchPerformanceScores = (p: any, match: MatchData): PerformanceScores => {
+  const baseline = RANK_AVERAGES.PLATINUM || RANK_AVERAGES.GOLD;
+  
   const durationMin = Math.max(1, match.info.gameDuration / 60);
   const cspm = (p.totalMinionsKilled + p.neutralMinionsKilled) / durationMin;
-  const gpm = p.goldEarned / durationMin;
-
+  const dpm = p.totalDamageDealtToChampions / durationMin;
+  const visionpm = p.visionScore / durationMin;
+  
   const teamParticipants = match.info.participants.filter((part) => part.teamId === p.teamId);
   const teamKills = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.kills, 0));
-  const teamDamage = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageDealtToChampions, 0));
-  const teamGold = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.goldEarned, 0));
-
-  const kp = (p.kills + p.assists) / teamKills;
-  const damageShare = p.totalDamageDealtToChampions / teamDamage;
-  const goldShare = p.goldEarned / teamGold;
+  const kp = ((p.kills + p.assists) / teamKills) * 100;
   const kdaRatio = (p.kills + p.assists) / Math.max(1, p.deaths);
-  const visionpm = p.visionScore / durationMin;
 
-  // 1. Laning Score (Dominance)
-  let laning = 1000;
-  if (p.firstBloodKill) laning += 300;
-  laning += Math.min(600, p.kills * 150);
-  laning -= Math.min(500, p.deaths * 100);
-  laning += (cspm - 6) * 150;
-  laning = Math.min(2500, Math.max(300, laning));
+  const ratioToScore = (val: number, base: number) => Math.min(100, Math.max(0, (val / Math.max(0.1, base)) * 60));
 
-  // 2. Farming Score (Efficiency)
-  let farming = (cspm * 180) + (gpm * 1.5);
-  if (p.teamPosition === "UTILITY" || p.individualPosition === "UTILITY") {
-    farming = (cspm * 450) + (gpm * 3.5) + (p.visionScore * 12);
-  }
-  farming = Math.min(2500, Math.max(300, farming));
+  const laning = ratioToScore(cspm, baseline.csPerMin) + (p.firstBloodKill ? 20 : 0);
+  const farming = ratioToScore(cspm, baseline.csPerMin);
+  const objectives = ratioToScore(p.damageDealtToObjectives / durationMin, 400);
+  const combat = ratioToScore(kdaRatio, baseline.kda);
+  const teamfight = ratioToScore(dpm, baseline.damagePerMin) * 0.5 + ratioToScore(kp, baseline.kp) * 0.5;
+  const vision = ratioToScore(visionpm, baseline.visionPerMin);
 
-  // 3. Objectives Score (Contribution)
-  const objDmgPm = (p.damageDealtToObjectives || 0) / durationMin;
-  let objectives = 800 + (objDmgPm * 1.5) + ((p.turretKills || 0) * 250) + ((p.turretTakedowns || p.turretKills || 0) * 125);
-  objectives = Math.min(2500, Math.max(300, objectives));
+  const total = calculateAIScore(p, match).score;
 
-  // 4. Combat Score (Effectiveness)
-  let combat = 600 + (kdaRatio * 150) + (p.kills * 120);
-  if (p.doubleKills > 0) combat += 100;
-  if (p.tripleKills > 0) combat += 200;
-  if (p.quadraKills > 0) combat += 400;
-  if (p.pentaKills > 0) combat += 800;
-  combat = Math.min(2500, Math.max(300, combat));
-
-  // 5. Teamfight Score (Contribution)
-  let teamfight = 500 + (kp * 1800) + (damageShare * 1000);
-  if (p.teamPosition === "TOP" || p.teamPosition === "JUNGLE" || p.individualPosition === "TOP" || p.individualPosition === "JUNGLE") {
-    const teamDmgTaken = Math.max(1, teamParticipants.reduce((acc, curr) => acc + curr.totalDamageTaken, 0));
-    const dmgTakenShare = p.totalDamageTaken / teamDmgTaken;
-    teamfight += (dmgTakenShare * 500);
-  }
-  teamfight = Math.min(2500, Math.max(300, teamfight));
-
-  // 6. Vision Score (Control)
-  let vision = (visionpm * 800) + ((p.visionWardsBoughtInGame || 0) * 150) + ((p.wardsPlaced || 0) * 20) + ((p.wardsKilled || 0) * 40);
-  if (p.teamPosition === "UTILITY" || p.individualPosition === "UTILITY") {
-    vision = (visionpm * 500) + ((p.visionWardsBoughtInGame || 0) * 80) + ((p.wardsPlaced || 0) * 15) + ((p.wardsKilled || 0) * 25);
-  }
-  vision = Math.min(2500, Math.max(300, vision));
-
-  const total = Math.round((laning + farming + objectives + combat + teamfight + vision) / 6);
-
-  return { laning, farming, objectives, combat, teamfight, vision, total };
+  return { 
+    laning: Math.min(100, laning), 
+    farming: Math.min(100, farming), 
+    objectives: Math.min(100, objectives), 
+    combat: Math.min(100, combat), 
+    teamfight: Math.min(100, teamfight), 
+    vision: Math.min(100, vision), 
+    total 
+  };
 };
 
 export const calculatePerformanceRank = (
-  n: number,
-  r: number,
+  avgScores: PerformanceScores,
   currentTier: string,
   currentRank: string
 ): { tier: string; rank: string; points: number } => {
-  const upperTier = currentTier?.toUpperCase() || "UNRANKED";
-  const upperRank = currentRank?.toUpperCase() || "I";
+  const score = avgScores.total;
+  let estimatedTier = "GOLD";
+  let estimatedRank = "IV";
 
-  if (upperTier === "UNRANKED") {
-    return { tier: "UNRANKED", rank: "", points: 0 };
-  }
+  if (score < 20) { estimatedTier = "IRON"; estimatedRank = "II"; }
+  else if (score < 30) { estimatedTier = "BRONZE"; estimatedRank = "II"; }
+  else if (score < 45) { estimatedTier = "SILVER"; estimatedRank = "II"; }
+  else if (score < 55) { estimatedTier = "GOLD"; estimatedRank = "II"; }
+  else if (score < 65) { estimatedTier = "PLATINUM"; estimatedRank = "II"; }
+  else if (score < 75) { estimatedTier = "EMERALD"; estimatedRank = "II"; }
+  else if (score < 85) { estimatedTier = "DIAMOND"; estimatedRank = "II"; }
+  else if (score < 90) { estimatedTier = "MASTER"; estimatedRank = "I"; }
+  else if (score < 95) { estimatedTier = "GRANDMASTER"; estimatedRank = "I"; }
+  else { estimatedTier = "CHALLENGER"; estimatedRank = "I"; }
 
-  const rankIdx = RANKS_POINTS.findIndex(x => x.tier === upperTier && (upperTier === "MASTER" || upperTier === "GRANDMASTER" || upperTier === "CHALLENGER" || x.rank === upperRank));
-  const basePoints = rankIdx !== -1 ? RANKS_POINTS[rankIdx].points : 6000;
-
-  let t = 0;
-  if (r > 2100) {
-    t = 6000;
-  } else if (r > 1900) {
-    t = 5000;
-  } else if (r > 1700) {
-    t = 4500;
-  } else if (r < 899) {
-    if (n >= 0.9 && n < 1.0) t = 4000;
-    else if (n >= 0.8 && n < 0.9) t = 5000;
-    else if (n < 0.8) t = 6000;
-    else t = 4000;
-  } else if (r < 1299) {
-    if (n >= 0.9 && n <= 1.0) t = 3000;
-    else t = 4000;
-  } else {
-    if (n > 0.9 && n < 1.0) t = 2000;
-    else if (n > 0.8 && n < 0.9) t = 3000;
-    else t = 4000;
-  }
-
-  const offset = Math.round(n * t) - t;
-  const points = basePoints + offset;
-
-  if (points <= 0) return { tier: "IRON", rank: "IV", points: points };
-  if (points >= 16000) return { tier: "CHALLENGER", rank: "I", points: points };
-
-  const rounded = 500 * Math.round(points / 500);
-  const matched = RANKS_POINTS.find(x => x.points >= rounded) || RANKS_POINTS[RANKS_POINTS.length - 1];
-
-  return { tier: matched.tier, rank: matched.rank, points };
+  const matched = RANKS_POINTS.find(x => x.tier === estimatedTier && x.rank === estimatedRank) || RANKS_POINTS[12];
+  
+  return { tier: estimatedTier, rank: estimatedRank, points: matched.points };
 };
 
 export const calculateOverallPerformanceData = (
@@ -433,41 +333,47 @@ export const calculateOverallPerformanceData = (
   const teamAverage = Math.round(history.reduce((acc, m) => acc + m.teamAverageScore, 0) / history.length);
   const enemyAverage = Math.round(history.reduce((acc, m) => acc + m.enemyAverageScore, 0) / history.length);
 
-  let pointList: number[] = [];
-  history.forEach((m) => {
-    const matchRank = calculatePerformanceRank(m.scores.total / Math.max(1, m.teamAverageScore), m.scores.total, currentTier, currentRank);
-    pointList.push(matchRank.points);
+  const winRate = history.filter(m => m.win).length / history.length;
+  
+  let modifiedAverages = { ...playerAverage };
+  if (winRate > 0.55) {
+     modifiedAverages.total = Math.min(100, modifiedAverages.total + 5);
+  }
+
+  // Use the new performance engine logic
+  const engineMatches: MatchDataInput[] = matches.map(m => {
+    const p = m.info.participants.find(p => p.puuid === summoner.account.puuid);
+    if (!p) return null;
+    return {
+      matchId: m.metadata.matchId,
+      win: p.win,
+      position: (p.teamPosition || "UNKNOWN") as Position,
+      championName: p.championName,
+      kills: p.kills,
+      deaths: p.deaths,
+      assists: p.assists,
+      totalCS: p.totalMinionsKilled + p.neutralMinionsKilled,
+      csPerMin: (p.totalMinionsKilled + p.neutralMinionsKilled) / (m.info.gameDuration / 60),
+      damageToChampions: p.totalDamageDealtToChampions,
+      damageShare: 0.2, // Rough fallback since we don't map full team damage here easily
+      killParticipation: 0.5, // Rough fallback
+      visionScore: p.visionScore,
+      visionScorePerMin: p.visionScore / (m.info.gameDuration / 60),
+      wardsPlaced: p.wardsPlaced || 0,
+      wardsKilled: p.wardsKilled || 0,
+      goldEarned: p.goldEarned,
+      goldShare: 0.2, // Rough fallback
+      gameDurationMinutes: m.info.gameDuration / 60
+    };
+  }).filter(Boolean) as MatchDataInput[];
+
+  const engineResult = computePerformanceRank({
+    currentTier,
+    currentDivision: currentRank,
+    currentLP: 0,
+    overallWinrate: winRate,
+    matches: engineMatches
   });
-
-  pointList.sort((a, b) => b - a);
-
-  let overallPoints = 0;
-  const tier = currentTier?.toUpperCase() || "UNRANKED";
-
-  if (tier !== "UNRANKED") {
-    const pct = ((playerAverage.total - teamAverage) / Math.max(1, teamAverage)) * 100;
-    if (pct > 15 && pointList.length > 3) {
-      pointList = pointList.slice(0, -2);
-    }
-    overallPoints = Math.round(pointList.reduce((acc, val) => acc + val, 0) / pointList.length);
-    if (pct > 0) {
-      overallPoints += (pct / 10) * 500;
-    }
-  }
-
-  if (overallPoints >= 16000) overallPoints = 16000;
-  if (overallPoints <= 0) overallPoints = 1;
-  if (tier === "UNRANKED") overallPoints = 0;
-
-  let finalTier = "UNRANKED";
-  let finalRankStr = "";
-
-  if (tier !== "UNRANKED") {
-    const rounded = Math.min(16000, Math.max(0, 500 * Math.round(overallPoints / 500)));
-    const matched = RANKS_POINTS.find(x => x.points === rounded) || RANKS_POINTS[0];
-    finalTier = matched.tier;
-    finalRankStr = matched.rank;
-  }
 
   return {
     playerAverage,
@@ -475,9 +381,9 @@ export const calculateOverallPerformanceData = (
     enemyAverage,
     history,
     performanceRank: {
-      tier: finalTier,
-      rank: finalRankStr,
-      points: overallPoints
+      tier: engineResult.tier,
+      rank: engineResult.division,
+      points: engineResult.points || 0
     }
   };
 };

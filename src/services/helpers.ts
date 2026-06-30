@@ -94,6 +94,9 @@ export const calculateUserStats = (matches: MatchData[], summoner: SummonerData 
     kda: Number(((totalKills + totalAssists) / Math.max(1, totalDeaths)).toFixed(2)),
     visionScore: Number((totalVision / games).toFixed(1)),
     damagePerMin: Number((totalDamage / durationMin).toFixed(1)),
+    visionPerMin: Number((totalVision / durationMin).toFixed(1)), // Estimated
+    goldPerMin: 0, // Fallback if no gold data in aggregate
+    kp: 0, // Fallback
     lane: mainLane !== "UNKNOWN" ? mainLane : undefined
   };
 };

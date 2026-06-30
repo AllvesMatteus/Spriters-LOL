@@ -50,8 +50,8 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
   const perfColorClass = TIER_COLORS[perfTier] || "text-[#9e9eb1]";
 
   return (
-    <div className={`liquid-glass rounded-[20px] mb-4 overflow-hidden transition-all duration-300 ${!data && "opacity-60"}`}>
-      <div className="flex border-b border-white/10 bg-black/20">
+    <div className={`relative z-50 liquid-glass rounded-[20px] mb-4 transition-all duration-300 ${!data && "opacity-60"}`}>
+      <div className="flex border-b border-white/10 bg-black/20 rounded-t-[20px] overflow-hidden">
         <button 
           className={`flex-1 py-3 text-[13px] font-bold transition-all relative ${
             activeTab === "Solo" 
@@ -80,10 +80,10 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
         </button>
       </div>
       
-      <div className="p-5 flex flex-col md:flex-row gap-6 md:gap-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
+      <div className="p-5 flex flex-col md:flex-row lg:flex-col gap-6 md:gap-4 lg:gap-6 divide-y md:divide-y-0 lg:divide-y md:divide-x lg:divide-x-0 divide-white/10">
         
         {/* Elo Atual */}
-        <div className="flex items-center gap-4 flex-1 pb-4 md:pb-0">
+        <div className="flex items-center gap-4 flex-1 pb-4 md:pb-0 lg:pb-4 lg:pr-0 md:pr-4">
           <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0 relative">
             <div className={`absolute inset-0 blur-xl opacity-20 rounded-full ${colorClass.replace('text-', 'bg-')}`} />
             {data ? (
@@ -98,11 +98,11 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
             )}
           </div>
           
-          <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5">
-            <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5">
+          <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5 min-w-0">
+            <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5 truncate">
               Elo Atual
             </span>
-            <h3 className={`text-[17px] font-black uppercase tracking-tight ${colorClass} leading-none mb-0.5`}>
+            <h3 className={`text-[17px] font-black uppercase tracking-tight ${colorClass} leading-none mb-0.5 truncate`}>
               {tier === "UNRANKED" ? "Unranked" : `${RANK_LABELS[tier] || tier} ${data?.rank || ""}`}
             </h3>
             <p className="text-[12px] font-black text-white leading-none mb-2">
@@ -135,7 +135,7 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
 
         {/* Elo de Performance */}
         {performanceRank && (
-          <div className="flex items-center gap-4 flex-1 pt-4 md:pt-0 md:pl-4">
+          <div className="flex items-center gap-4 flex-1 pt-4 md:pt-0 lg:pt-4 md:pl-4 lg:pl-0">
             <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0 relative">
               <div className={`absolute inset-0 blur-xl opacity-20 rounded-full ${perfColorClass.replace('text-', 'bg-')}`} />
               {perfTier !== "UNRANKED" ? (
@@ -150,12 +150,12 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
               )}
             </div>
             
-            <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5 group/perf">
+            <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5 group/perf min-w-0">
               <div className="flex items-center gap-1">
-                <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5">
+                <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5 truncate">
                   Elo de Performance
                 </span>
-                <div className="relative inline-block cursor-help">
+                <div className="relative inline-block cursor-help shrink-0">
                   <svg className="w-3 h-3 text-[#62636c] hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -164,12 +164,9 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
                   </div>
                 </div>
               </div>
-              <h3 className={`text-[17px] font-black uppercase tracking-tight ${perfColorClass} leading-none mb-0.5`}>
+              <h3 className={`text-[17px] font-black uppercase tracking-tight ${perfColorClass} leading-none mb-2 truncate`}>
                 {perfTier === "UNRANKED" ? "Unranked" : `${RANK_LABELS[perfTier] || perfTier} ${performanceRank.rank || ""}`}
               </h3>
-              <p className="text-[12px] font-black text-white leading-none mb-2">
-                {performanceRank.points > 0 ? performanceRank.points : 0} <span className="text-[9px] text-[#9e9eb1] font-bold">PTS</span>
-              </p>
               <div className="text-[9px] font-bold text-[#62636c] uppercase tracking-wider">
                 Desempenho Real
               </div>

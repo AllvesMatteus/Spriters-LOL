@@ -43,33 +43,17 @@ export const HomePage: React.FC<HomePageProps> = ({
 
     const fetchPatches = async () => {
       try {
-        const res = await fetch("https://ddragon.leagueoflegends.com/api/versions.json");
-        const versions: string[] = await res.json();
-        
-
-        const uniquePatches = Array.from(new Set(versions.map(v => v.split('.').slice(0, 2).join('.')))).slice(0, 3);
-        
-
-        const patchData = uniquePatches.map((patch, index) => {
-          const formattedUrl = patch.split('.').join('-'); // e.g. 14.6 -> 14-6
-          
-          let dateStr = "Recente";
-          if (index > 0) {
-            dateStr = `Há ${index * 14} Dias`;
-          }
-
-          return {
-            title: `Notas da Atualização de League of Legends ${patch}`,
-            url: `https://www.leagueoflegends.com/pt-br/news/game-updates/notas-da-atualizacao-${formattedUrl}/`,
-            date: dateStr
-          };
-        });
-
-        setPatches(patchData);
+        const res = await fetch("/api/patch-notes");
+        if (!res.ok) throw new Error("Failed to fetch patch notes");
+        const data = await res.json();
+        if (data.length > 0) {
+           setPatches(data);
+        } else {
+           throw new Error("Empty patches");
+        }
       } catch (err) {
-
         setPatches([
-          { title: "Notas da Atualização de League of Legends Terbaru", url: "https://www.leagueoflegends.com/pt-br/", date: "Recente" },
+          { title: "Notas da Atualização de League of Legends", url: "https://www.leagueoflegends.com/pt-br/news/tags/patch-notes/", date: "Recente" },
         ]);
       }
     };

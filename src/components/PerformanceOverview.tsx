@@ -7,10 +7,10 @@ interface PerformanceOverviewProps {
 }
 
 const getScoreColor = (score: number) => {
-  if (score < 1000) return "#ef4444"; // Vermelho (baixo)
-  if (score < 1400) return "#f97316"; // Laranja (médio-baixo)
-  if (score < 1800) return "#eab308"; // Amarelo (médio)
-  if (score < 2200) return "#22c55e"; // Verde (bom)
+  if (score < 40) return "#ef4444"; // Vermelho (baixo)
+  if (score < 55) return "#f97316"; // Laranja (médio-baixo)
+  if (score < 70) return "#eab308"; // Amarelo (médio)
+  if (score < 85) return "#22c55e"; // Verde (bom)
   return "#a855f7"; // Roxo/Rosa (excelente)
 };
 
@@ -24,7 +24,7 @@ const ProgressRing: React.FC<{
   const stroke = 3.5;
   const normalizedRadius = radius - stroke * 2;
   const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset = circumference - (Math.min(2500, score) / 2500) * circumference;
+  const strokeDashoffset = circumference - (Math.min(100, score) / 100) * circumference;
 
   return (
     <div className="flex flex-col items-center justify-center relative shrink-0 p-3 border border-white/5 rounded-2xl bg-black/20 flex-1 min-w-[100px] hover:bg-black/30 transition-all">
@@ -68,7 +68,7 @@ const StatProgressBar: React.FC<{
   iconPath: string;
 }> = ({ label, score, iconPath }) => {
   const color = getScoreColor(score);
-  const percentage = (score / 2500) * 100;
+  const percentage = (score / 100) * 100;
 
   return (
     <div className="flex flex-col gap-1 w-full">
@@ -77,7 +77,7 @@ const StatProgressBar: React.FC<{
           <img src={iconPath} alt={label} className="w-3 h-3 opacity-60" onError={(e) => (e.currentTarget.style.display = "none")} />
           {label}
         </span>
-        <span className="text-[12px] font-black text-white">{score} <span className="text-[8px] text-[#62636c]">/ 2500</span></span>
+        <span className="text-[12px] font-black text-white">{score} <span className="text-[8px] text-[#62636c]">/ 100</span></span>
       </div>
       <div className="h-[6px] w-full bg-[#16171d] rounded-full overflow-hidden border border-white/5 relative">
         <div 
@@ -128,21 +128,21 @@ const CustomTooltip = ({ active, payload, label, history }: any) => {
               <div className="w-1.5 h-1.5 rounded-full bg-[#5095D5]" />
               <span className="text-[#9e9eb1]">Seu Score:</span>
             </div>
-            <span className="text-[#e1e1e1] font-black">{m.scores.total}</span>
+            <span className="text-[#e1e1e1] font-black">{Number(m.scores.total).toFixed(0)}</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#4c92fc]" />
               <span className="text-[#9e9eb1]">Média do Time:</span>
             </div>
-            <span className="text-[#e1e1e1] font-black">{m.teamAverageScore}</span>
+            <span className="text-[#e1e1e1] font-black">{Number(m.teamAverageScore).toFixed(0)}</span>
           </div>
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#f24254]" />
               <span className="text-[#9e9eb1]">Média do Inimigo:</span>
             </div>
-            <span className="text-[#e1e1e1] font-black">{m.enemyAverageScore}</span>
+            <span className="text-[#e1e1e1] font-black">{Number(m.enemyAverageScore).toFixed(0)}</span>
           </div>
         </div>
         <div className="text-[9px] text-[#62636c] font-black uppercase text-center mt-1">
@@ -200,18 +200,18 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
             </svg>
           </button>
           <div className="absolute right-0 top-[120%] bg-[#1c1d21]/95 text-[#9e9eb1] text-[10px] leading-relaxed p-3 rounded-xl border border-white/10 shadow-2xl opacity-0 pointer-events-none group-hover/help:opacity-100 transition-opacity duration-300 w-64 z-[100] backdrop-blur-md">
-            Esta seção exibe sua pontuação de performance calculada em cada partida em uma escala de 300 a 2500, medindo sua eficácia em relação à média do seu time e da equipe oponente.
+            Esta seção exibe sua pontuação de performance calculada em cada partida em uma escala de 0 a 100, medindo sua eficácia em relação à média do seu time e da equipe oponente.
           </div>
         </div>
       </div>
 
-      {/* Grid: Averages Cards & 6 Pillars */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      {/* Responsive Flex Layout: Averages Cards & 6 Pillars */}
+      <div className="flex flex-col xl:flex-row gap-6 items-stretch">
         
         {/* Averages Circles (Left) */}
-        <div className="lg:col-span-4 flex flex-col justify-between gap-3">
+        <div className="w-full xl:w-[320px] shrink-0 flex flex-col justify-between gap-3">
           <h3 className="text-[10px] font-black text-[#62636c] uppercase tracking-wider mb-1">Scores Médios</h3>
-          <div className="flex gap-2 w-full">
+          <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full">
             <ProgressRing score={playerAverage.total} label="Você" sublabel="Player Avg" color="#5095D5" />
             <ProgressRing score={teamAverage} label="Seu Time" sublabel="Team Avg" color="#4c92fc" />
             <ProgressRing score={enemyAverage} label="Oponentes" sublabel="Enemy Avg" color="#f24254" />
@@ -227,7 +227,7 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
         </div>
 
         {/* 6 Pillars Breakdown (Right) */}
-        <div className="lg:col-span-8 flex flex-col justify-between gap-3 bg-black/10 border border-white/5 rounded-2xl p-4">
+        <div className="flex-1 flex flex-col justify-between gap-3 bg-black/10 border border-white/5 rounded-2xl p-4 min-w-0">
           <h3 className="text-[10px] font-black text-[#62636c] uppercase tracking-wider mb-2">Pilares de Desempenho</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3.5">
             <StatProgressBar label="Fase de Rotas (Laning)" score={playerAverage.laning} iconPath="/assets/laning-icon.svg" />
@@ -248,7 +248,7 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} onClick={handleChartClick} margin={{ left: -15, right: 5, top: 5, bottom: 5 }}>
               <XAxis dataKey="name" stroke="#62636c" fontSize={9} tickLine={false} axisLine={false} />
-              <YAxis domain={[300, 2500]} stroke="#62636c" fontSize={9} tickLine={false} axisLine={false} />
+              <YAxis domain={[0, 100]} stroke="#62636c" fontSize={9} tickLine={false} axisLine={false} />
               <Tooltip content={<CustomTooltip history={history} />} cursor={{ stroke: "rgba(255,255,255,0.06)", strokeWidth: 1.5 }} />
               <Line type="monotone" dataKey="Média do Inimigo" stroke="#f24254" strokeWidth={1} dot={{ r: 2 }} activeDot={{ r: 4 }} opacity={0.6} />
               <Line type="monotone" dataKey="Média do Time" stroke="#4c92fc" strokeWidth={1} dot={{ r: 2 }} activeDot={{ r: 4 }} opacity={0.6} />

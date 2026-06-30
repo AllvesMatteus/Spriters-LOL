@@ -31,7 +31,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [summoner, setSummoner] = useState<SummonerData | null>(null);
   const [matches, setMatches] = useState<MatchData[]>([]);
-  const [matchFilter, setMatchFilter] = useState("all");
+  const [matchFilter, setMatchFilter] = useState("420");
   const [matchStart, setMatchStart] = useState(0);
   const [loadingMatches, setLoadingMatches] = useState(false);
   const [targetRank, setTargetRank] = useState("GOLD");
@@ -121,7 +121,7 @@ export default function App() {
       saveSearch(finalName, finalTag, finalRegion, summonerData.summoner?.profileIconId);
 
       setLoadingMatches(true);
-      const matchesRes = await fetch(`/api/matches?puuid=${summonerData.account.puuid}&region=${finalRegion}`);
+      const matchesRes = await fetch(`/api/matches?puuid=${summonerData.account.puuid}&region=${finalRegion}&count=20&queue=420`);
       if (!matchesRes.ok) throw new Error("Erro ao buscar partidas");
       const matchesData = await matchesRes.json();
       setMatches(matchesData);
@@ -161,7 +161,7 @@ export default function App() {
     setLoadingMatches(true);
     try {
       const filterParam = filter === "all" ? "" : `&queue=${filter}`;
-      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=0&count=20${filterParam}`);
+      const res = await fetch(`/api/matches?puuid=${summoner.account.puuid}&region=${region}&start=0&count=20&queue=420${filterParam}`);
       if (!res.ok) throw new Error("Erro ao buscar partidas filtradas");
       const data = await res.json();
       setMatches(data);

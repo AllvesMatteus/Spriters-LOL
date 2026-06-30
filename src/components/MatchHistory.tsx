@@ -115,7 +115,7 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
   const left = x + 20 + tooltipW > vw ? x - tooltipW - 8 : x + 20;
   const top  = y + tooltipH > vh ? y - tooltipH - 8 : y + 8;
 
-  const aiColor = aiScoreNum >= 8 ? "#f0ba65" : aiScoreNum >= 6 ? "#5de8c8" : aiScoreNum >= 4 ? "#9e9eb1" : "#f24254";
+  const aiColor = aiScoreNum >= 8.0 ? "#f0ba65" : aiScoreNum >= 6.0 ? "#4c92fc" : aiScoreNum >= 4.0 ? "#9e9eb1" : "#f24254";
   const headerBg = part.win ? "bg-[#1e2d45] border-b border-[#2c4163]" : "bg-[#3d2028] border-b border-[#5a2b35]";
   const winTag = part.win
     ? "text-[#4c92fc] bg-[#1a2d4a] border border-[#2c4163]"
@@ -458,9 +458,10 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                     <div className="flex flex-col items-center shrink-0">
                       <div className={cn(
                         "w-[34px] h-[22px] rounded border flex items-center justify-center shadow-lg transition-colors",
-                        (calculateAIScore(p, match).score / 10) >= 8 ? "bg-[#5de8c8]/20 border-[#5de8c8]/40 text-[#5de8c8]" :
-                        (calculateAIScore(p, match).score / 10) >= 6 ? "bg-[#f0ba65]/20 border-[#f0ba65]/40 text-[#f0ba65]" :
-                        "bg-white/5 border-white/10 text-white"
+                        (calculateAIScore(p, match).score / 10) >= 8.0 ? "bg-[#f0ba65]/20 border-[#f0ba65]/40 text-[#f0ba65]" :
+                        (calculateAIScore(p, match).score / 10) >= 6.0 ? "bg-[#4c92fc]/20 border-[#4c92fc]/40 text-[#4c92fc]" :
+                        (calculateAIScore(p, match).score / 10) >= 4.0 ? "bg-[#9e9eb1]/20 border-[#9e9eb1]/40 text-[#9e9eb1]" :
+                        "bg-[#f24254]/20 border-[#f24254]/40 text-[#f24254]"
                       )}>
                         <span className="text-[12px] md:text-[13px] font-black leading-none tracking-tighter">{(calculateAIScore(p, match).score / 10).toFixed(1)}</span>
                       </div>

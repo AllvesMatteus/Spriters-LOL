@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { SummonerData, MatchData } from "./types";
 import { calculateUserStats, getStreak, getWinRate, getInitialTargetRank, calculateOverallPerformanceData } from "./utils/helpers";
+import { getCookie, setCookie } from "./utils/cookies";
 import { Header } from "./components/Header";
 import { ProfileCard } from "./components/ProfileCard";
 import { RankCard } from "./components/RankCard";
@@ -14,6 +15,7 @@ import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { ContactPage } from "./components/ContactPage";
 import { Footer } from "./components/Footer";
 import { PerformanceOverview } from "./components/PerformanceOverview";
+import { CookieConsent } from "./components/CookieConsent";
 
 const REGIONS = [
   { id: "br1", name: "Brasil" },
@@ -41,7 +43,7 @@ export default function App() {
   const [page, setPage] = useState<"home" | "privacy" | "contact">("home");
 
   useEffect(() => {
-    const saved = localStorage.getItem("lol_recent_searches");
+    const saved = getCookie("lol_recent_searches");
     if (saved) {
       setRecentSearches(JSON.parse(saved));
     }
@@ -68,13 +70,13 @@ export default function App() {
     });
     const sorted = [...updated].sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
     setRecentSearches(sorted);
-    localStorage.setItem("lol_recent_searches", JSON.stringify(sorted));
+    setCookie("lol_recent_searches", JSON.stringify(sorted), 365);
   };
 
   const removeSearch = (name: string, tag: string) => {
     const updated = recentSearches.filter(s => !(s.name === name && s.tag === tag));
     setRecentSearches(updated);
-    localStorage.setItem("lol_recent_searches", JSON.stringify(updated));
+    setCookie("lol_recent_searches", JSON.stringify(updated), 365);
   };
 
   const saveSearch = (name: string, tag: string, reg: string, profileIconId?: number) => {
@@ -84,7 +86,7 @@ export default function App() {
     const updated = [newSearch, ...filtered].slice(0, 10);
     const sorted = [...updated].sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
     setRecentSearches(sorted);
-    localStorage.setItem("lol_recent_searches", JSON.stringify(sorted));
+    setCookie("lol_recent_searches", JSON.stringify(sorted), 365);
   };
 
   const handleSearch = async (e?: React.FormEvent, overrideName?: string, overrideTag?: string, overrideRegion?: string) => {
@@ -357,6 +359,7 @@ export default function App() {
         </main>
       )}
       <Footer onNavigate={(p) => setPage(p as any)} isHome={page === "home" && isHome} />
+      <CookieConsent />
       </div>
     </div>
   );

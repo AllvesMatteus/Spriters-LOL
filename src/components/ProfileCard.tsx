@@ -49,7 +49,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ summoner, streak, onUp
   const colorClass = TIER_COLORS[tier] || "text-[#9e9eb1]";
 
   return (
-    <div className="liquid-glass rounded-xl p-5 md:p-6 flex flex-col xl:flex-row items-center justify-between gap-6 mb-4 mt-8 relative overflow-hidden group">
+    <div className="liquid-glass rounded-2xl p-5 md:p-6 flex flex-col xl:flex-row items-center justify-between gap-6 mb-4 mt-8 relative overflow-hidden group">
       
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#4c92fc]/10 blur-[100px] -mr-32 -mt-32 pointer-events-none" />
       
@@ -76,7 +76,7 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({ summoner, streak, onUp
             </h2>
             <button 
               onClick={onUpdate}
-              className="group bg-[#4c92fc] hover:bg-[#5a9cff] text-white text-[11px] font-black px-4 py-1.5 rounded-lg transition-all duration-300 active:scale-95 shadow-[0_0_15px_rgba(76,146,252,0.3)] hover:shadow-[0_0_25px_rgba(76,146,252,0.5)] hover:-translate-y-0.5 uppercase tracking-widest h-fit flex items-center gap-2 ml-2"
+              className="group bg-[#2b2c30] hover:bg-white/10 border border-white/5 text-[#9e9eb1] hover:text-white text-[11px] font-bold px-4 py-1.5 rounded-lg transition-all duration-300 active:scale-95 uppercase tracking-widest h-fit flex items-center gap-2 ml-2"
             >
               Atualizar
               <RefreshCw className="w-3 h-3 transition-transform duration-500 group-hover:rotate-180" />

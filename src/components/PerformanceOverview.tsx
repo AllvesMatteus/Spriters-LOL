@@ -187,7 +187,7 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
   };
 
   return (
-    <div className="liquid-glass rounded-3xl p-6 mb-4 shadow-2xl relative overflow-hidden flex flex-col gap-6">
+    <div className="liquid-glass rounded-2xl p-6 mb-4 shadow-2xl relative overflow-hidden flex flex-col gap-6">
       <div className="flex items-center justify-between border-b border-white/5 pb-4">
         <div>
           <h2 className="text-[18px] font-black uppercase tracking-wider text-white">Análise de Performance</h2>

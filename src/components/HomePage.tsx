@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Search, Loader2, Star, X } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { SearchDropdown } from "./SearchDropdown";
 import logo from "../assets/images/logo/logo.png";
 
 interface HomePageProps {
@@ -77,13 +78,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div className="w-full max-w-[700px] relative z-20">
         <form 
           onSubmit={(e) => handleSearch(e)} 
-          className="liquid-glass flex items-center h-[56px] rounded-full overflow-hidden border border-white/10 shadow-2xl focus-within:border-[#4c92fc] transition-colors"
+          className="liquid-glass flex items-center h-[56px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl focus-within:border-[#4c92fc] transition-colors"
         >
           <div className="pl-4 pr-2">
              <select
                 value={region}
                 onChange={(e) => setRegion(e.target.value)}
-                className="bg-black/20 text-white border-none py-1.5 px-3 rounded-full focus:outline-none text-[12px] font-bold cursor-pointer"
+                className="bg-black/20 text-white border-none py-1.5 px-3 rounded-lg focus:outline-none text-[12px] font-bold cursor-pointer"
               >
                 {REGIONS.map((r) => (
                   <option key={r.id} value={r.id} className="bg-[#212328]">
@@ -119,67 +120,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         
         <AnimatePresence>
           {showSuggestions && suggestions.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 5 }}
-              className="absolute top-[64px] left-0 right-0 bg-[#1e2029] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-50 py-2"
-            >
-              <div className="px-5 py-3 border-b border-[#2b2c30]">
-                <span className="text-[12px] font-bold text-[#9e9eb1] uppercase tracking-wider">Buscas Recentes</span>
-              </div>
-              {suggestions.map((s, i) => (
-                <div
-                  key={i}
-                  className="w-full px-5 py-3 hover:bg-[#2b2c30] transition-colors flex justify-between items-center group cursor-pointer"
-                  onClick={() => {
-                    setSearchInput(`${s.name}#${s.tag}`);
-                    setRegion(s.region);
-                    handleSearch(undefined, s.name, s.tag, s.region);
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    {s.profileIconId ? (
-                      <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/profileicon/${s.profileIconId}.png`} className="w-10 h-10 rounded-full border border-black/50 shadow-md" alt="" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-black/20 border border-black/50 shadow-md flex items-center justify-center">
-                         <span className="text-[12px] text-[#9e9eb1]">?</span>
-                      </div>
-                    )}
-                    <div className="flex flex-col items-start leading-tight">
-                      <span className="text-[15px] font-bold text-[#e1e1e1]">
-                        {s.name} <span className="text-[#9e9eb1] font-medium">#{s.tag}</span>
-                      </span>
-                      <span className="text-[11px] font-bold text-[#62636c] uppercase tracking-widest">{s.region}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleFavorite && toggleFavorite(s.name, s.tag);
-                      }}
-                      className="p-1.5 hover:bg-white/10 rounded transition-colors text-[#9e9eb1] hover:text-[#f0ba65]"
-                      title={s.favorite ? "Remover dos Favoritos" : "Adicionar aos Favoritos"}
-                    >
-                      <Star className={`w-4 h-4 ${s.favorite ? "fill-[#f0ba65] text-[#f0ba65]" : ""}`} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeSearch && removeSearch(s.name, s.tag);
-                      }}
-                      className="p-1.5 hover:bg-[#f24254]/20 hover:text-[#f24254] rounded transition-colors text-[#9e9eb1]"
-                      title="Excluir Histórico"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
+            <SearchDropdown
+              suggestions={suggestions}
+              setSearchInput={setSearchInput}
+              setRegion={setRegion}
+              handleSearch={handleSearch}
+              toggleFavorite={toggleFavorite}
+              removeSearch={removeSearch}
+              className="absolute top-[64px] left-0 right-0"
+            />
           )}
         </AnimatePresence>
         {showSuggestions && <div className="fixed inset-0 z-10" onClick={() => setShowSuggestions(false)} />}
@@ -191,7 +140,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <h3 className="text-[14px] font-bold"><span className="text-[#3aa99a]">NOTAS</span> de Atualização</h3>
           <a href="https://www.leagueoflegends.com/pt-br/news/tags/patch-notes/" target="_blank" rel="noreferrer" className="text-[12px] text-[#9e9eb1] hover:text-white transition-colors">Mais &gt;</a>
         </div>
-        <div className="liquid-glass rounded-xl overflow-hidden shadow-xl">
+        <div className="liquid-glass rounded-2xl overflow-hidden shadow-xl">
           {patches.length > 0 ? patches.map((patch, index) => {
             return (
               <a 

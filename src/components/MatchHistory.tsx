@@ -344,7 +344,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
           </div>
        )}
        {!isLoading && matches.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-2 py-14 liquid-glass rounded-[20px] text-[#9e9eb1] shadow-2xl">
+          <div className="flex flex-col items-center justify-center gap-2 py-14 liquid-glass rounded-2xl text-[#9e9eb1] shadow-2xl">
             <span className="text-[28px]">🔍</span>
             <p className="text-[14px] font-bold text-white">Nenhuma partida encontrada</p>
             <p className="text-[12px]">Não há partidas registradas neste modo para este invocador.</p>
@@ -429,7 +429,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
             <div className="relative flex items-stretch p-0 z-10 w-full h-full">
 
               
-              <div className="flex flex-col justify-center px-3 py-4 w-[90px] md:w-[104px] shrink-0 border-r border-white/5 relative z-10">
+              <div className="flex flex-col justify-center px-3 py-2.5 w-[90px] md:w-[100px] shrink-0 border-r border-white/5 relative z-10">
                 <p className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-wider mb-1.5 opacity-80 leading-[1.1] break-words line-clamp-2", textColor)}>
                   {getQueueType(match.info.queueId, match.info.gameMode)}
                 </p>
@@ -443,14 +443,14 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                   <p className="text-[10px] text-[#9e9eb1] font-bold">{timeAgo(match.info.gameEndTimestamp)}</p>
                 </div>
 
-                <div className="mt-3 flex items-center justify-center w-full opacity-40">
+                <div className="mt-2 flex items-center justify-center w-full opacity-40">
                    <div className="h-[1px] flex-1 bg-white/20" />
-                   <p className="text-[8px] font-black text-white uppercase tracking-wider mx-1.5 whitespace-nowrap">{durationMin}M {durationSec}S</p>
+                   <p className="text-[8px] font-black text-white uppercase tracking-wider mx-1.5 whitespace-nowrap">{durationMin}m{durationSec}s</p>
                    <div className="h-[1px] flex-1 bg-white/20" />
                 </div>
 
                 
-                <div className="flex flex-col w-full mt-3">
+                <div className="flex flex-col w-full mt-2">
                   <span className="text-[7.5px] font-black text-[#9e9eb1] uppercase tracking-[0.05em] mb-1 opacity-60">Score</span>
                   <div className="flex items-start gap-2">
                     
@@ -486,19 +486,20 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
               </div>
 
               
-              <div className="flex-1 flex items-center justify-start px-6 py-3 gap-6 md:gap-10 relative z-10 w-full overflow-x-auto no-scrollbar">
-                
-                
-                <div className="flex flex-col items-center gap-2 md:gap-3 shrink-0">
-                  <div className="flex items-center gap-2 md:gap-3">
-                  <div className="relative">
-                    <div className={cn("absolute -inset-1 rounded-xl blur-md opacity-20", 
+              {/* Corpo central reorganizado: sem scroll horizontal */}
+              <div className="flex-1 flex flex-col justify-center px-4 py-2.5 gap-2 relative z-10 w-full min-w-0">
+
+                {/* Linha 1: Campeão + Spells + KDA */}
+                <div className="flex items-center gap-3.5 min-w-0">
+                  {/* Campeão */}
+                  <div className="relative shrink-0">
+                    <div className={cn("absolute -inset-1 rounded-xl blur-md opacity-20",
                       isWin ? "bg-[#4c92fc]" : "bg-[#f24254]"
                     )} />
                     <img
                       src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/champion/${getChampionName(p.championName)}.png`}
                       alt={p.championName}
-                      className="w-[48px] h-[48px] md:w-[56px] md:h-[56px] rounded-xl object-cover relative z-10 border border-white/10"
+                      className="w-[54px] h-[54px] rounded-xl object-cover relative z-10 border border-white/10"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute -bottom-1 -right-1 bg-[#16171d] text-white text-[8px] font-black w-[18px] h-[18px] flex items-center justify-center rounded-full border border-white/20 z-20">
@@ -506,64 +507,56 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-1 shrink-0">
-                    <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/spell/${SPELL_ICONS[p.summoner1Id] || "SummonerFlash"}.png`} alt="" className="w-[20px] h-[20px] md:w-[22px] md:h-[22px] rounded border border-white/5" />
-                    <div className="w-[20px] h-[20px] md:w-[22px] md:h-[22px] bg-[#16171d]/80 rounded flex items-center justify-center border border-white/5"><Zap className="w-3 h-3 text-yellow-500" /></div>
-                    <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/spell/${SPELL_ICONS[p.summoner2Id] || "SummonerSmite"}.png`} alt="" className="w-[20px] h-[20px] md:w-[22px] md:h-[22px] rounded border border-white/5" />
-                    <div className="w-[20px] h-[20px] md:w-[22px] md:h-[22px] bg-[#16171d]/80 rounded flex items-center justify-center border border-white/5"><Shield className="w-3 h-3 text-blue-500" /></div>
+                  {/* Spells 2x2 */}
+                  <div className="grid grid-cols-2 gap-[3px] shrink-0">
+                    <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/spell/${SPELL_ICONS[p.summoner1Id] || "SummonerFlash"}.png`} alt="" className="w-[22px] h-[22px] rounded border border-white/5" />
+                    <div className="w-[22px] h-[22px] bg-[#16171d]/80 rounded flex items-center justify-center border border-white/5"><Zap className="w-3 h-3 text-yellow-500" /></div>
+                    <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/spell/${SPELL_ICONS[p.summoner2Id] || "SummonerSmite"}.png`} alt="" className="w-[22px] h-[22px] rounded border border-white/5" />
+                    <div className="w-[22px] h-[22px] bg-[#16171d]/80 rounded flex items-center justify-center border border-white/5"><Shield className="w-3 h-3 text-blue-500" /></div>
                   </div>
 
-                  </div>
-
-                  
-                  <div className="flex flex-col items-center w-full">
-                    <div className="text-[18px] md:text-[22px] font-black leading-none tracking-tighter flex items-center gap-1.5">
+                  {/* KDA */}
+                  <div className="flex flex-col items-start min-w-0">
+                    <div className="text-[18px] font-black leading-none tracking-tighter flex items-center gap-1">
                       <span className="text-[#5de8c8]">{p.kills}</span>
-                      <span className="text-white/20 font-normal">/</span>
+                      <span className="text-white/20 font-normal text-[13px]">/</span>
                       <span className="text-[#f24254]">{p.deaths}</span>
-                      <span className="text-white/20 font-normal">/</span>
+                      <span className="text-white/20 font-normal text-[13px]">/</span>
                       <span className="text-white">{p.assists}</span>
                     </div>
-                    <span className="text-[11px] md:text-[12px] font-black text-white/50 uppercase tracking-widest mt-1.5 md:mt-2">{kdaRatio} KDA</span>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">{kdaRatio} KDA</span>
+                  </div>
+
+                  {/* CS + Visão (inline para md+, desaparece em telas muito pequenas) */}
+                  <div className="hidden sm:flex flex-col items-start gap-0 ml-auto shrink-0 pl-4 border-l border-white/5">
+                    <span className="text-[12px] font-bold text-white leading-snug">{cs} <span className="text-[10px] text-[#9e9eb1]/60">({cspm})</span></span>
+                    <span className="text-[8px] font-bold text-[#9e9eb1] uppercase tracking-wide">CS/min</span>
+                    <span className="text-[12px] font-bold text-white leading-snug mt-1.5">{p.visionScore}</span>
+                    <span className="text-[8px] font-bold text-[#9e9eb1] uppercase tracking-wide">Visão</span>
                   </div>
                 </div>
 
-                
-                <div className="flex flex-col gap-2 shrink-0">
+                {/* Linha 2: Multi-kill tag + Itens */}
+                <div className="flex items-center gap-2 min-w-0 mt-0.5">
                   {multiKillTag && (
-                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-[#f24254]/20 text-[#f24254] border border-[#f24254]/30 uppercase self-start whitespace-nowrap mb-0.5">
+                    <span className="text-[7px] font-black px-1.5 py-0.5 rounded bg-[#f24254]/20 text-[#f24254] border border-[#f24254]/30 uppercase whitespace-nowrap shrink-0">
                       {multiKillTag}
                     </span>
                   )}
-                  
-                  <div className="flex gap-[2px] md:gap-[3px]">
+                  <div className="flex gap-[2px] flex-wrap">
                     {[0, 1, 2, 3, 4, 5].map((i) => {
                       const itemId = (p as any)[`item${i}`];
                       return (
-                        <div key={i} className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] bg-[#16171d]/80 rounded-md overflow-hidden border border-white/10 shadow-inner shrink-0">
+                        <div key={i} className="w-[26px] h-[26px] bg-[#16171d]/80 rounded-md overflow-hidden border border-white/10 shadow-inner shrink-0">
                           {itemId > 0 && <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/item/${itemId}.png`} alt="" className="w-full h-full object-cover" />}
                         </div>
                       );
                     })}
-                    <div className="w-[20px] h-[20px] md:w-[24px] md:h-[24px] bg-[#16171d]/80 rounded-full overflow-hidden border border-[#f0ba65]/30 ml-1 shrink-0">
+                    <div className="w-[26px] h-[26px] bg-[#16171d]/80 rounded-full overflow-hidden border border-[#f0ba65]/30 ml-1 shrink-0">
                       {(p as any)[`item6`] > 0 && <img src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/item/${(p as any)[`item6`]}.png`} alt="" className="w-full h-full object-cover" />}
                     </div>
                   </div>
                 </div>
-
-                
-                <div className="hidden lg:flex flex-col justify-center gap-1.5 pl-6 shrink-0 border-l border-white/5 min-w-[70px] ml-auto">
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-[10px] md:text-[11px] font-bold text-[#9e9eb1] uppercase">CS</span>
-                    <span className="text-[12px] md:text-[14px] font-bold text-white leading-none whitespace-nowrap">{cs} <span className="text-[10px] text-[#9e9eb1]/60 font-medium">({cspm})</span></span>
-                  </div>
-                  <div className="flex items-baseline justify-between gap-4">
-                    <span className="text-[10px] md:text-[11px] font-bold text-[#9e9eb1] uppercase">Visão</span>
-                    <span className="text-[12px] md:text-[14px] font-bold text-white leading-none">{p.visionScore}</span>
-                  </div>
-                </div>
-
-
 
               </div>
 

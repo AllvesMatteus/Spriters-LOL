@@ -33,12 +33,12 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
           content: `Este sistema utiliza a API pública da Riot Games para buscar dados de partidas, sumoners e ranque. Esses dados são de acesso público e estão disponíveis conforme os Termos de Serviço da Riot Games. Não acessamos dados privados de conta ou informações vinculadas ao login da Riot.`
         },
         {
-          title: "3. Armazenamento Local",
-          content: `O Spriters LOL pode armazenar buscas recentes no armazenamento local (localStorage) do seu navegador para facilitar o acesso rápido. Esses dados ficam apenas no seu dispositivo e não são enviados a nenhum servidor.`
+          title: "3. Armazenamento Local e Cookies",
+          content: `O Spriters LOL utiliza cookies para armazenar suas buscas recentes, favoritos e preferências, facilitando o acesso rápido e aprimorando sua experiência. Esses dados ficam armazenados exclusivamente no seu dispositivo e não são enviados a nenhum servidor externo.`
         },
         {
-          title: "4. Cookies",
-          content: `Não utilizamos cookies de rastreamento, publicidade ou análise de terceiros. Qualquer uso de armazenamento do navegador é exclusivamente funcional, para persistência de preferências como região ou buscas recentes.`
+          title: "4. Política de Rastreadores",
+          content: `Não utilizamos cookies de rastreamento, publicidade ou análise de terceiros. Qualquer uso de armazenamento do navegador é estritamente funcional (como aceitação dos termos ou histórico recente).`
         },
         {
           title: "5. Compartilhamento de Dados",

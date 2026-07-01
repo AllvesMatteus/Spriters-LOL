@@ -50,8 +50,8 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
   const perfColorClass = TIER_COLORS[perfTier] || "text-[#9e9eb1]";
 
   return (
-    <div className={`relative z-50 liquid-glass rounded-[20px] mb-4 transition-all duration-300 ${!data && "opacity-60"}`}>
-      <div className="flex border-b border-white/10 bg-black/20 rounded-t-[20px] overflow-hidden">
+    <div className={`relative z-50 liquid-glass rounded-2xl mb-4 transition-all duration-300 ${!data && "opacity-60"}`}>
+      <div className="flex border-b border-white/10 bg-black/20 rounded-t-2xl overflow-hidden">
         <button 
           className={`flex-1 py-3 text-[13px] font-bold transition-all relative ${
             activeTab === "Solo" 

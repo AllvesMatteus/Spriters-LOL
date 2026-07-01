@@ -125,7 +125,7 @@ const CustomTooltip = ({ active, payload, label, history }: any) => {
         <div className="flex flex-col gap-1 text-[10px] font-bold">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#5095D5]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#5de8c8]" />
               <span className="text-[#9e9eb1]">Seu Score:</span>
             </div>
             <span className="text-[#e1e1e1] font-black">{Number(m.scores.total).toFixed(0)}</span>
@@ -212,7 +212,7 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
         <div className="w-full xl:w-[320px] shrink-0 flex flex-col justify-between gap-3">
           <h3 className="text-[10px] font-black text-[#62636c] uppercase tracking-wider mb-1">Scores Médios</h3>
           <div className="flex flex-wrap sm:flex-nowrap gap-2 w-full">
-            <ProgressRing score={playerAverage.total} label="Você" sublabel="Player Avg" color="#5095D5" />
+            <ProgressRing score={playerAverage.total} label="Você" sublabel="Player Avg" color="#5de8c8" />
             <ProgressRing score={teamAverage} label="Seu Time" sublabel="Team Avg" color="#4c92fc" />
             <ProgressRing score={enemyAverage} label="Oponentes" sublabel="Enemy Avg" color="#f24254" />
           </div>
@@ -252,7 +252,7 @@ export const PerformanceOverview: React.FC<PerformanceOverviewProps> = ({ perfor
               <Tooltip content={<CustomTooltip history={history} />} cursor={{ stroke: "rgba(255,255,255,0.06)", strokeWidth: 1.5 }} />
               <Line type="monotone" dataKey="Média do Inimigo" stroke="#f24254" strokeWidth={1} dot={{ r: 2 }} activeDot={{ r: 4 }} opacity={0.6} />
               <Line type="monotone" dataKey="Média do Time" stroke="#4c92fc" strokeWidth={1} dot={{ r: 2 }} activeDot={{ r: 4 }} opacity={0.6} />
-              <Line type="monotone" dataKey="Seu Score" stroke="#5095D5" strokeWidth={2} dot={{ r: 3.5 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="Seu Score" stroke="#5de8c8" strokeWidth={2} dot={{ r: 3.5 }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>

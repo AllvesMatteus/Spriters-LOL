@@ -170,9 +170,6 @@ export const ImprovementTips: React.FC<ImprovementTipsProps> = ({
                   <span className={`text-[12px] font-black uppercase ${targetRank === key ? "text-[#5de8c8]" : "text-[#9e9eb1]"}`}>
                     {val.displayName}
                   </span>
-                  {targetRank === key && (
-                    <span className="text-[9px] font-black bg-[#5de8c8]/10 text-[#5de8c8] px-1.5 py-0.5 rounded border border-[#5de8c8]/20">ATIVO</span>
-                  )}
                 </div>
               ))}
             </div>

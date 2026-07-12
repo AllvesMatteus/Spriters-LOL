@@ -11,7 +11,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
       {onBack && (
         <button
           onClick={onBack}
-          className="text-[12px] text-[#9e9eb1] hover:text-[#4c92fc] transition-colors mb-8 cursor-pointer block font-bold"
+          className="text-[12px] text-[#9e9eb1] hover:text-[#5de8c8] transition-colors mb-8 cursor-pointer block font-bold"
         >
           Voltar ao início
         </button>
@@ -37,7 +37,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
             </div>
             <div className="min-w-0">
               <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-0.5">GitHub</p>
-              <p className="text-[17px] font-black text-white group-hover:text-[#4c92fc] transition-colors truncate">AllvesMatteus</p>
+              <p className="text-[17px] font-black text-white group-hover:text-[#5de8c8] transition-colors truncate">AllvesMatteus</p>
               <p className="text-[11px] text-[#9e9eb1] truncate mt-0.5">github.com/AllvesMatteus</p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
             </div>
             <div className="min-w-0">
               <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-0.5">LinkedIn</p>
-              <p className="text-[17px] font-black text-white group-hover:text-[#4c92fc] transition-colors truncate">Mateus Alves</p>
+              <p className="text-[17px] font-black text-white group-hover:text-[#5de8c8] transition-colors truncate">Mateus Alves</p>
               <p className="text-[11px] text-[#9e9eb1] truncate mt-0.5">linkedin.com/in/mateus-allves</p>
             </div>
           </div>

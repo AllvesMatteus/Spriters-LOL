@@ -52,7 +52,7 @@ export const RegionSelect: React.FC<RegionSelectProps> = ({
                     setIsOpen(false);
                   }}
                   className={`w-full text-left px-4 py-2 text-[12px] font-bold transition-colors cursor-pointer block ${
-                    value === r.id ? "text-[#4c92fc] bg-white/5" : "text-[#e1e1e1] hover:bg-[#2b2c30]"
+                    value === r.id ? "text-[#5de8c8] bg-white/5" : "text-[#e1e1e1] hover:bg-[#2b2c30]"
                   }`}
                 >
                   {r.id.toUpperCase()}{" "}

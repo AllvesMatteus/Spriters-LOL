@@ -10,7 +10,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onBack }) => {
       {onBack && (
         <button
           onClick={onBack}
-          className="text-[12px] text-[#9e9eb1] hover:text-[#4c92fc] transition-colors mb-8 cursor-pointer block font-bold"
+          className="text-[12px] text-[#9e9eb1] hover:text-[#5de8c8] transition-colors mb-8 cursor-pointer block font-bold"
         >
           Voltar ao início
         </button>

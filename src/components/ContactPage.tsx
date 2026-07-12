@@ -1,4 +1,5 @@
 import React from "react";
+import { Github, Linkedin } from "lucide-react";
 
 interface ContactPageProps {
   onBack?: () => void;
@@ -19,7 +20,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
       <div className="mb-12">
         <h1 className="text-[36px] font-black text-white mt-1 leading-none tracking-tight">Contato</h1>
         <p className="text-[14px] text-[#9e9eb1] mt-3 leading-relaxed max-w-lg font-medium">
-          O Spriters LOL é um projeto privado e de desenvolvimento independente. Para sugestões, feedbacks ou contato profissional, utilize os links abaixo.
+          Caso tenha alguma sugestão, feedback ou queira apenas bater um papo sobre o projeto, sinta-se à vontade para me contatar através de um dos canais abaixo.
         </p>
       </div>
 
@@ -30,10 +31,15 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
           rel="noreferrer"
           className="block group"
         >
-          <div className="liquid-glass rounded-2xl p-6 hover:border-white/20 hover:bg-white/10 transition-all duration-300 shadow-xl h-full">
-            <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-1">GitHub</p>
-            <p className="text-[18px] font-black text-white group-hover:text-[#4c92fc] transition-colors">AllvesMatteus</p>
-            <p className="text-[12px] text-[#9e9eb1] mt-1 font-semibold">github.com/AllvesMatteus</p>
+          <div className="liquid-glass rounded-2xl p-6 hover:border-white/20 hover:bg-white/10 transition-all duration-300 shadow-xl h-full flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center shrink-0 border border-white/10 group-hover:border-white/20 transition-colors">
+              <Github className="w-6 h-6 text-[#e1e1e1]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-0.5">GitHub</p>
+              <p className="text-[17px] font-black text-white group-hover:text-[#4c92fc] transition-colors truncate">AllvesMatteus</p>
+              <p className="text-[11px] text-[#9e9eb1] truncate mt-0.5">github.com/AllvesMatteus</p>
+            </div>
           </div>
         </a>
 
@@ -43,10 +49,15 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onBack }) => {
           rel="noreferrer"
           className="block group"
         >
-          <div className="liquid-glass rounded-2xl p-6 hover:border-white/20 hover:bg-white/10 transition-all duration-300 shadow-xl h-full">
-            <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-1">LinkedIn</p>
-            <p className="text-[18px] font-black text-white group-hover:text-[#4c92fc] transition-colors">Mateus Alves</p>
-            <p className="text-[12px] text-[#9e9eb1] mt-1 font-semibold">linkedin.com/in/mateus-allves</p>
+          <div className="liquid-glass rounded-2xl p-6 hover:border-white/20 hover:bg-white/10 transition-all duration-300 shadow-xl h-full flex items-center gap-4">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center shrink-0 border border-white/10 group-hover:border-white/20 transition-colors">
+              <Linkedin className="w-6 h-6 text-[#4c92fc]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-black text-[#9e9eb1] uppercase tracking-wider mb-0.5">LinkedIn</p>
+              <p className="text-[17px] font-black text-white group-hover:text-[#4c92fc] transition-colors truncate">Mateus Alves</p>
+              <p className="text-[11px] text-[#9e9eb1] truncate mt-0.5">linkedin.com/in/mateus-allves</p>
+            </div>
           </div>
         </a>
       </div>

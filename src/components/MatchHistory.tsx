@@ -590,7 +590,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
         <button
           onClick={onLoadMore}
           disabled={isLoading}
-          className="w-full mt-2 py-4 liquid-glass hover:bg-white/10 transition-colors rounded-[20px] text-[#e1e1e1] font-bold text-[13px] shadow-2xl"
+          className="w-full mt-2 py-4 liquid-glass hover:bg-white/10 transition-colors rounded-[20px] text-[#e1e1e1] font-bold text-[13px] shadow-2xl cursor-pointer"
         >
           {isLoading ? "Carregando..." : "Carregar Mais Partidas"}
         </button>

@@ -13,6 +13,7 @@ import { HomePage } from "./components/HomePage";
 import { SidebarTabs } from "./components/SidebarTabs";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { ContactPage } from "./components/ContactPage";
+import { AboutPage } from "./components/AboutPage";
 import { Footer } from "./components/Footer";
 import { PerformanceOverview } from "./components/PerformanceOverview";
 import { CookieConsent } from "./components/CookieConsent";
@@ -40,12 +41,31 @@ export default function App() {
   const [selectedLane, setSelectedLane] = useState("");
   const [recentSearches, setRecentSearches] = useState<{ name: string; tag: string; region: string; favorite?: boolean }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [page, setPage] = useState<"home" | "privacy" | "contact">("home");
+  const [page, setPage] = useState<"home" | "privacy" | "contact" | "about">("home");
 
   useEffect(() => {
     const saved = getCookie("lol_recent_searches");
     if (saved) {
-      setRecentSearches(JSON.parse(saved));
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const clean: typeof recentSearches = [];
+          parsed.forEach(item => {
+            if (item && item.name && item.tag) {
+              const duplicate = clean.find(
+                c => c.name.toLowerCase() === item.name.toLowerCase() && 
+                     c.tag.toLowerCase() === item.tag.toLowerCase()
+              );
+              if (!duplicate) {
+                clean.push(item);
+              }
+            }
+          });
+          setRecentSearches(clean);
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, []);
 
@@ -63,7 +83,7 @@ export default function App() {
 
   const toggleFavorite = (name: string, tag: string) => {
     const updated = recentSearches.map(s => {
-      if (s.name === name && s.tag === tag) {
+      if (s.name.toLowerCase() === name.toLowerCase() && s.tag.toLowerCase() === tag.toLowerCase()) {
         return { ...s, favorite: !s.favorite };
       }
       return s;
@@ -74,15 +94,15 @@ export default function App() {
   };
 
   const removeSearch = (name: string, tag: string) => {
-    const updated = recentSearches.filter(s => !(s.name === name && s.tag === tag));
+    const updated = recentSearches.filter(s => !(s.name.toLowerCase() === name.toLowerCase() && s.tag.toLowerCase() === tag.toLowerCase()));
     setRecentSearches(updated);
     setCookie("lol_recent_searches", JSON.stringify(updated), 365);
   };
 
   const saveSearch = (name: string, tag: string, reg: string, profileIconId?: number) => {
-    const existing = recentSearches.find(s => s.name === name && s.tag === tag);
+    const existing = recentSearches.find(s => s.name.toLowerCase() === name.toLowerCase() && s.tag.toLowerCase() === tag.toLowerCase());
     const newSearch = { name, tag, region: reg, profileIconId: profileIconId || existing?.profileIconId, favorite: existing?.favorite || false };
-    const filtered = recentSearches.filter(s => !(s.name === name && s.tag === tag));
+    const filtered = recentSearches.filter(s => !(s.name.toLowerCase() === name.toLowerCase() && s.tag.toLowerCase() === tag.toLowerCase()));
     const updated = [newSearch, ...filtered].slice(0, 10);
     const sorted = [...updated].sort((a, b) => (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0));
     setRecentSearches(sorted);
@@ -120,6 +140,8 @@ export default function App() {
       if (!summonerRes.ok) throw new Error("Invocador não encontrado");
       const summonerData = await summonerRes.json();
       setSummoner(summonerData);
+      setSearchInput(`${finalName}#${finalTag}`);
+      setRegion(finalRegion);
       saveSearch(finalName, finalTag, finalRegion, summonerData.summoner?.profileIconId);
 
       setLoadingMatches(true);
@@ -221,10 +243,16 @@ export default function App() {
     matchFilter === "440" ? "Ranqueada Flex" :
     matchFilter === "450" ? "ARAM" : "Partidas";
 
-  const suggestions = recentSearches.filter(s => 
-    s.name.toLowerCase().includes(searchInput.toLowerCase()) || 
-    `${s.name}#${s.tag}`.toLowerCase().includes(searchInput.toLowerCase())
-  ).slice(0, 4);
+  const isInputMatchingCurrentSummoner = summoner && 
+    searchInput.toLowerCase().trim() === `${summoner.account.gameName}#${summoner.account.tagLine}`.toLowerCase().trim();
+
+  const suggestions = recentSearches.filter(s => {
+    if (!searchInput || isInputMatchingCurrentSummoner) {
+      return true;
+    }
+    return s.name.toLowerCase().includes(searchInput.toLowerCase()) || 
+      `${s.name}#${s.tag}`.toLowerCase().includes(searchInput.toLowerCase());
+  }).slice(0, 4);
 
   const isHome = !summoner && !loading && !error && page === "home";
 
@@ -233,9 +261,9 @@ export default function App() {
       
       
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-[#4c92fc]/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '12s' }} />
-        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#8b5bd3]/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '18s' }} />
-        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] bg-[#5de8c8]/10 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '15s' }} />
+        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-[#4c92fc]/10 rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute top-[20%] -right-[10%] w-[50%] h-[50%] bg-[#8b5bd3]/10 rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[60%] bg-[#5de8c8]/10 rounded-full blur-[120px] mix-blend-screen" />
       </div>
 
       <div className="relative z-10 flex flex-col flex-1">
@@ -266,6 +294,11 @@ export default function App() {
       {page === "contact" && (
         <div className="flex-1">
           <ContactPage onBack={() => setPage("home")} />
+        </div>
+      )}
+      {page === "about" && (
+        <div className="flex-1">
+          <AboutPage onBack={() => setPage("home")} />
         </div>
       )}
       {page === "home" && isHome ? (

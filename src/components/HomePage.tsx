@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Search, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { SearchDropdown } from "./SearchDropdown";
+import { RegionSelect } from "./RegionSelect";
 import logo from "../assets/images/logo/logo.png";
 
 interface HomePageProps {
@@ -78,20 +79,10 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div className="w-full max-w-[700px] relative z-20">
         <form 
           onSubmit={(e) => handleSearch(e)} 
-          className="liquid-glass flex items-center h-[56px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl focus-within:border-[#4c92fc] transition-colors"
+          className="liquid-glass flex items-center h-[56px] rounded-2xl border border-white/10 shadow-2xl focus-within:border-[#4c92fc] transition-colors"
         >
           <div className="pl-4 pr-2">
-             <select
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className="bg-black/20 text-white border-none py-1.5 px-3 rounded-lg focus:outline-none text-[12px] font-bold cursor-pointer"
-              >
-                {REGIONS.map((r) => (
-                  <option key={r.id} value={r.id} className="bg-[#212328]">
-                    {r.id.toUpperCase()}
-                  </option>
-                ))}
-            </select>
+            <RegionSelect value={region} onChange={setRegion} regions={REGIONS} variant="home" />
           </div>
 
           <div className="flex-1 px-4 h-full">
@@ -111,7 +102,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <button
             type="submit"
             disabled={loading}
-            className="px-6 h-full flex items-center justify-center text-[#4C92FC] hover:bg-white/5 transition-colors"
+            className="px-6 h-full flex items-center justify-center text-[#4C92FC] hover:bg-white/5 transition-colors rounded-r-2xl"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Search className="w-6 h-6" />}
           </button>
@@ -138,7 +129,6 @@ export const HomePage: React.FC<HomePageProps> = ({
       <div className="w-full max-w-[700px] mt-8">
         <div className="flex items-center justify-between mb-2.5 px-2">
           <h3 className="text-[14px] font-bold"><span className="text-[#3aa99a]">NOTAS</span> de Atualização</h3>
-          <a href="https://www.leagueoflegends.com/pt-br/news/tags/patch-notes/" target="_blank" rel="noreferrer" className="text-[12px] text-[#9e9eb1] hover:text-white transition-colors">Mais &gt;</a>
         </div>
         <div className="liquid-glass rounded-2xl overflow-hidden shadow-xl">
           {patches.length > 0 ? patches.map((patch, index) => {

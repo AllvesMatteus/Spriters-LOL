@@ -2,6 +2,7 @@ import React from "react";
 import { Search, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { SearchDropdown } from "./SearchDropdown";
+import { RegionSelect } from "./RegionSelect";
 import logo from "../assets/images/logo/logo.png";
 
 interface HeaderProps {
@@ -50,20 +51,10 @@ export const Header: React.FC<HeaderProps> = ({
         
         {!isHome && (
           <div className="flex-1 max-w-[400px] ml-auto mr-8 relative">
-            <form onSubmit={(e) => handleSearch(e)} className="flex items-center h-[34px] bg-[#212328] rounded-2xl overflow-hidden border border-[#35363b]">
-              <select
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                className="bg-transparent border-none py-1.5 px-3 focus:outline-none text-[11px] font-bold text-[#e1e1e1] cursor-pointer"
-              >
-                {REGIONS.map((r) => (
-                  <option key={r.id} value={r.id} className="bg-[#212328]">
-                    {r.id.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+            <form onSubmit={(e) => handleSearch(e)} className="flex items-center h-[34px] bg-[#212328] rounded-xl border border-white/10 shadow-2xl focus-within:border-[#4c92fc] transition-colors pl-1">
+              <RegionSelect value={region} onChange={setRegion} regions={REGIONS} variant="header" />
 
-              <div className="w-[1px] h-4 bg-[#35363b]" />
+              <div className="w-[1px] h-4 bg-white/10 ml-1" />
 
               <div className="flex-1 px-3">
                 <input
@@ -82,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-3 h-full flex items-center justify-center text-[#4C92FC] hover:bg-[#2b2c30] transition-colors"
+                className="px-3 h-full flex items-center justify-center text-[#4C92FC] hover:bg-[#2b2c30] transition-colors rounded-r-xl"
               >
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               </button>

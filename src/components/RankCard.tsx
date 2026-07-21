@@ -35,6 +35,9 @@ interface RankCardProps {
     tier: string;
     rank: string;
     points: number;
+    classificationConfidence?: number;
+    probabilities?: Array<{ tier: string; probability: number }>;
+    explainabilityText?: string;
   } | null;
 }
 
@@ -50,7 +53,7 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
   const perfColorClass = TIER_COLORS[perfTier] || "text-[#9e9eb1]";
 
   return (
-    <div className={`relative z-50 liquid-glass rounded-2xl mb-4 transition-all duration-300 ${!data ? "opacity-60" : ""}`}>
+    <div className={`relative z-30 liquid-glass rounded-2xl mb-4 transition-all duration-300 ${!data ? "opacity-60" : ""}`}>
       <div className="flex border-b border-white/10 bg-black/20 rounded-t-2xl overflow-hidden">
         <button 
           className={`flex-1 py-3 text-[13px] font-bold transition-all relative ${
@@ -131,47 +134,76 @@ export const RankCard: React.FC<RankCardProps> = ({ soloData, flexData, performa
             </div>
           </div>
         </div>
-
+ 
         {performanceRank && (
-          <div className="flex items-center gap-4 flex-1 pt-4 md:pt-0 lg:pt-4 md:pl-4 lg:pl-0">
-            <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0 relative">
-              <div className={`absolute inset-0 blur-xl opacity-20 rounded-full ${perfColorClass.replace('text-', 'bg-')}`} />
-              {perfTier !== "UNRANKED" ? (
-                <img
-                  src={`https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${perfTier.toLowerCase()}.png`}
-                  alt="Rank Performance"
-                  className="w-full h-full object-contain drop-shadow-2xl scale-[3.2] relative z-10 pointer-events-none"
-                  onError={(e) => (e.currentTarget.style.display = "none")}
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-[#62636c] font-black">?</div>
-              )}
-            </div>
-            
-            <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5 group/perf min-w-0">
-              <div className="flex items-center gap-1">
-                <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5 truncate">
-                  Elo de Performance
-                </span>
-                <div className="relative inline-block cursor-help shrink-0 hover:z-50">
-                  <svg className="w-4 h-4 text-[#62636c] hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-[130%] bg-[#1c1d21]/95 text-[#9e9eb1] text-[10px] leading-relaxed p-2.5 rounded-xl border border-white/10 shadow-2xl opacity-0 pointer-events-none group-hover/perf:opacity-100 transition-opacity duration-300 w-56 z-[100] backdrop-blur-md">
-                    Este elo é calculado de forma não oficial com base no seu desempenho (KDA, dano, farm, visão, objetivos e lutas) comparado aos seus companheiros de equipe e oponentes nas últimas partidas.
+          <div className="flex flex-col gap-3.5 flex-1 pt-4 md:pt-0 lg:pt-4 md:pl-4 lg:pl-0">
+            <div className="flex items-center gap-4">
+              <div className="w-[72px] h-[72px] rounded-full flex items-center justify-center shrink-0 relative">
+                <div className={`absolute inset-0 blur-xl opacity-20 rounded-full ${perfColorClass.replace('text-', 'bg-')}`} />
+                {perfTier !== "UNRANKED" ? (
+                  <img
+                    src={`https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-emblem/emblem-${perfTier.toLowerCase()}.png`}
+                    alt="Rank Performance"
+                    className="w-full h-full object-contain drop-shadow-2xl scale-[3.2] relative z-10 pointer-events-none"
+                    onError={(e) => (e.currentTarget.style.display = "none")}
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[10px] text-[#62636c] font-black">?</div>
+                )}
+              </div>
+              
+              <div className="flex flex-col flex-1 justify-center relative w-full gap-0.5 group/perf min-w-0">
+                <div className="flex items-center gap-1">
+                  <span className="text-[9px] font-black text-[#62636c] uppercase tracking-widest leading-none mb-0.5 truncate">
+                    Elo de Performance
+                  </span>
+                  <div className="relative inline-block cursor-help shrink-0 hover:z-50">
+                    <svg className="w-4 h-4 text-[#62636c] hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-[130%] bg-[#1c1d21]/95 text-[#9e9eb1] text-[10px] leading-relaxed p-2.5 rounded-xl border border-white/10 shadow-2xl opacity-0 pointer-events-none group-hover/perf:opacity-100 transition-opacity duration-300 w-56 z-[100] backdrop-blur-md">
+                      Este elo representa onde seu desempenho de jogo se enquadra estatisticamente no elo alvo (comparando farm, KDA, visão e objetivos).
+                    </div>
                   </div>
                 </div>
-              </div>
-              <h3 className={`text-[17px] font-black uppercase tracking-tight ${perfColorClass} leading-none mb-2 truncate`}>
-                {perfTier === "UNRANKED" ? "Unranked" : `${RANK_LABELS[perfTier] || perfTier} ${performanceRank.rank || ""}`}
-              </h3>
-              <div className="text-[9px] font-bold text-[#62636c] uppercase tracking-wider">
-                Desempenho Real
+                <h3 className={`text-[17px] font-black uppercase tracking-tight ${perfColorClass} leading-none mb-2 truncate`}>
+                  {perfTier === "UNRANKED" ? "Unranked" : `${RANK_LABELS[perfTier] || perfTier} ${performanceRank.rank || ""}`}
+                </h3>
+                <div className="text-[9px] font-bold text-[#62636c] uppercase tracking-wider">
+                  Desempenho Real
+                </div>
               </div>
             </div>
+
+            {performanceRank.classificationConfidence !== undefined && (
+              <div className="flex flex-col gap-2 border-t border-white/5 pt-3.5">
+                <div className="flex justify-between items-center text-[10px] font-bold text-[#9e9eb1]">
+                  <span>Confiança Estatística:</span>
+                  <span className="text-[#5de8c8] font-black">{(performanceRank.classificationConfidence * 100).toFixed(0)}%</span>
+                </div>
+                
+                {performanceRank.probabilities && performanceRank.probabilities.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[8px] font-black text-[#62636c] uppercase tracking-wider">Distribuição por Elo:</span>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {performanceRank.probabilities.slice(0, 3).map(p => (
+                        <span key={p.tier} className="text-[9px] font-black bg-white/5 border border-white/10 px-1.5 py-0.5 rounded text-[#9e9eb1]">
+                          {RANK_LABELS[p.tier] || p.tier}: {(p.probability * 100).toFixed(0)}%
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {performanceRank.explainabilityText && (
+                  <p className="text-[9.5px] font-semibold text-[#62636c] leading-relaxed italic mt-0.5">
+                    {performanceRank.explainabilityText}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         )}
-        
       </div>
     </div>
   );

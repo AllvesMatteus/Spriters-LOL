@@ -22,9 +22,19 @@ const REGIONS = [
   { id: "br1", name: "Brasil" },
   { id: "na1", name: "América do Norte" },
   { id: "euw1", name: "Europa Oeste" },
-  { id: "eun1", name: "Europa Nórdica" },
+  { id: "eun1", name: "Europa Nórdica e Oriental" },
   { id: "kr", name: "Coreia" },
   { id: "jp1", name: "Japão" },
+  { id: "la1", name: "América Latina Norte" },
+  { id: "la2", name: "América Latina Sul" },
+  { id: "oc1", name: "Oceania" },
+  { id: "tr1", name: "Turquia" },
+  { id: "ru", name: "Rússia" },
+  { id: "ph2", name: "Filipinas" },
+  { id: "sg2", name: "Singapura" },
+  { id: "th2", name: "Tailândia" },
+  { id: "tw2", name: "Taiwan" },
+  { id: "vn2", name: "Vietnã" },
 ];
 
 export default function App() {
@@ -234,9 +244,11 @@ export default function App() {
       matches,
       summoner,
       soloData?.tier || "UNRANKED",
-      soloData?.rank || "I"
+      soloData?.rank || "I",
+      targetRank,
+      effectiveLane
     );
-  }, [matches, summoner, soloData?.tier, soloData?.rank]);
+  }, [matches, summoner, soloData?.tier, soloData?.rank, targetRank, effectiveLane]);
 
   const filterLabel = matchFilter === "all" ? "Últimas partidas" :
     matchFilter === "420" ? "Ranqueada Solo" :
@@ -348,6 +360,7 @@ export default function App() {
                     currentTier={soloData?.tier || "UNRANKED"} 
                     selectedLane={effectiveLane}
                     setSelectedLane={setSelectedLane}
+                    performanceData={performanceData}
                   />
 
                   
@@ -366,7 +379,11 @@ export default function App() {
                   <StatsSummary userStats={userStats} targetRank={targetRank} winRate={filteredWinRate} filterLabel={filterLabel} matchCount={matches.length} />
 
                   {performanceData && (
-                    <PerformanceOverview performanceData={performanceData} />
+                    <PerformanceOverview 
+                      performanceData={performanceData} 
+                      region={region}
+                      role={effectiveLane}
+                    />
                   )}
 
                   {matches.length > 0 ? (

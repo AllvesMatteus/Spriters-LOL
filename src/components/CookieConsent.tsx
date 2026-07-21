@@ -9,7 +9,6 @@ export const CookieConsent: React.FC = () => {
   useEffect(() => {
     const consent = getCookie("cookie_consent_accepted");
     if (!consent) {
-      // Delay slightly for better UX
       const timer = setTimeout(() => setIsVisible(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -34,14 +33,14 @@ export const CookieConsent: React.FC = () => {
             <div className="bg-[#2b2c30] p-3 rounded-full flex-shrink-0">
               <Cookie className="w-6 h-6 text-[#9e9eb1]" />
             </div>
-            
+
             <div className="flex-1 text-center sm:text-left">
               <h3 className="text-white font-semibold text-sm mb-1">Aviso de Cookies e Plugins</h3>
               <p className="text-[#9e9eb1] text-xs leading-relaxed">
                 Utilizamos cookies e plugins apenas para funcionalidades essenciais, como salvar seus favoritos e histórico de buscas recentes. Não realizamos rastreamento para anúncios.
               </p>
             </div>
-            
+
             <button
               onClick={handleAccept}
               className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-[#5de8c8] to-[#45c3a5] text-[#12131a] font-bold text-sm rounded-lg hover:shadow-[0_0_15px_rgba(93,232,200,0.4)] transition-all flex-shrink-0"

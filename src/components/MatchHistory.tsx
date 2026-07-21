@@ -21,10 +21,6 @@ const LANE_IMG: Record<string, string> = {
   BOTTOM: imgLaneAdc,
   UTILITY: imgLaneSupport,
 };
-
-
-
-
 interface TooltipPlayer {
   part: any;
   match: MatchData;
@@ -33,19 +29,18 @@ interface TooltipPlayer {
   y: number;
 }
 
-
 const TIER_COLORS: Record<string, { color: string; bg: string }> = {
-  IRON:        { color: "#7a7c82", bg: "#2a2b2e" },
-  BRONZE:      { color: "#a06b3c", bg: "#2e2119" },
-  SILVER:      { color: "#7fa8b4", bg: "#1a2529" },
-  GOLD:        { color: "#C8AA6E", bg: "#2a2415" },
-  PLATINUM:    { color: "#3cbfb4", bg: "#102825" },
-  EMERALD:     { color: "#3bde7e", bg: "#0e2820" },
-  DIAMOND:     { color: "#7ba6de", bg: "#141c2f" },
-  MASTER:      { color: "#9b4dde", bg: "#1f1030" },
+  IRON: { color: "#7a7c82", bg: "#2a2b2e" },
+  BRONZE: { color: "#a06b3c", bg: "#2e2119" },
+  SILVER: { color: "#7fa8b4", bg: "#1a2529" },
+  GOLD: { color: "#C8AA6E", bg: "#2a2415" },
+  PLATINUM: { color: "#3cbfb4", bg: "#102825" },
+  EMERALD: { color: "#3bde7e", bg: "#0e2820" },
+  DIAMOND: { color: "#7ba6de", bg: "#141c2f" },
+  MASTER: { color: "#9b4dde", bg: "#1f1030" },
   GRANDMASTER: { color: "#de4040", bg: "#2e1010" },
-  CHALLENGER:  { color: "#f5d76e", bg: "#2e2a00" },
-  UNRANKED:    { color: "#9e9eb1", bg: "#1c1d21" },
+  CHALLENGER: { color: "#f5d76e", bg: "#2e2a00" },
+  UNRANKED: { color: "#9e9eb1", bg: "#1c1d21" },
 };
 
 const RANK_LABEL: Record<string, string> = {
@@ -53,7 +48,6 @@ const RANK_LABEL: Record<string, string> = {
   PLATINUM: "Platina", EMERALD: "Esmeralda", DIAMOND: "Diamante",
   MASTER: "Mestre", GRANDMASTER: "Grão-Mestre", CHALLENGER: "Desafiante",
 };
-
 
 const rankCache: Record<string, any[]> = {};
 
@@ -113,7 +107,7 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
   const tooltipW = 288;
   const tooltipH = 340;
   const left = x + 20 + tooltipW > vw ? x - tooltipW - 8 : x + 20;
-  const top  = y + tooltipH > vh ? y - tooltipH - 8 : y + 8;
+  const top = y + tooltipH > vh ? y - tooltipH - 8 : y + 8;
 
   const aiColor = aiScoreNum >= 8.0 ? "#f0ba65" : aiScoreNum >= 6.0 ? "#4c92fc" : aiScoreNum >= 4.0 ? "#9e9eb1" : "#f24254";
   const headerBg = part.win ? "bg-[#1e2d45] border-b border-[#2c4163]" : "bg-[#3d2028] border-b border-[#5a2b35]";
@@ -130,9 +124,9 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
         className="rounded-xl shadow-2xl overflow-hidden"
         style={{ width: tooltipW, background: "#13141a", border: "1px solid #2b2c30" }}
       >
-        
+
         <div className={`${headerBg} px-3 py-2.5 flex items-center gap-3`}>
-          
+
           <div className="relative shrink-0">
             <img
               src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/champion/${getChampionName(part.championName)}.png`}
@@ -145,7 +139,6 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
             </span>
           </div>
 
-          
           <div className="flex-1 min-w-0">
             <p className="text-[13px] font-black text-white truncate leading-tight">
               {part.riotIdGameName || part.summonerName}
@@ -170,14 +163,13 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
             </div>
           </div>
 
-          
+
           <div className="flex flex-col items-center shrink-0">
             <span className="text-[18px] font-black leading-none" style={{ color: aiColor }}>{aiScore}</span>
             <span className="text-[8px] text-[#9e9eb1] mt-0.5 uppercase tracking-wider">AI Score</span>
           </div>
         </div>
 
-        
         <div
           className="flex items-center gap-3 px-3 py-3 border-b border-[#2b2c30]"
           style={{ background: tierStyle.bg }}
@@ -217,7 +209,7 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
           )}
         </div>
 
-        
+
         <div className="flex items-center justify-between px-3 py-2.5 border-b border-[#2b2c30]">
           <span className="text-[18px] font-black tracking-tight">
             <span className="text-[#5de8c8]">{part.kills}</span>
@@ -232,7 +224,6 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
           </div>
         </div>
 
-        
         <div className="grid grid-cols-3 border-b border-[#2b2c30]">
           {[
             { val: cspm, label: "CS/min" },
@@ -246,15 +237,13 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
           ))}
         </div>
 
-        
         <div className="flex items-center gap-1 px-3 py-2">
-          {[0,1,2,3,4,5,6].map(i => {
+          {[0, 1, 2, 3, 4, 5, 6].map(i => {
             const itemId = part[`item${i}`];
             const isTrinket = i === 6;
             return (
-              <div key={i} className={`overflow-hidden shrink-0 bg-[#1c1d21] border border-[#2b2c30] ${
-                isTrinket ? "w-[22px] h-[22px] rounded-full ml-auto" : "w-[28px] h-[28px] rounded"
-              }`}>
+              <div key={i} className={`overflow-hidden shrink-0 bg-[#1c1d21] border border-[#2b2c30] ${isTrinket ? "w-[22px] h-[22px] rounded-full ml-auto" : "w-[28px] h-[28px] rounded"
+                }`}>
                 {itemId > 0 && (
                   <img
                     src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/item/${itemId}.png`}
@@ -271,7 +260,6 @@ const PlayerTooltip: React.FC<{ data: TooltipPlayer }> = ({ data }) => {
     </div>
   );
 };
-
 
 interface MatchHistoryProps {
   matches: MatchData[];
@@ -319,37 +307,36 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
   return (
     <div className="space-y-1.5 flex flex-col">
       <div className="flex liquid-glass rounded-2xl mb-2 flex-wrap shadow-xl overflow-hidden border-white/5">
-         {filters.map((f, i) => (
-           <button
-             key={f.value}
-             onClick={() => onFilterChange?.(f.value)}
-             className={`relative flex-1 py-3 px-2 text-[12px] md:text-[13px] font-bold transition-colors whitespace-nowrap ${i > 0 ? "border-l border-white/5" : ""} ${
-               matchFilter === f.value
-                 ? "text-white"
-                 : "text-[#9e9eb1] hover:text-[#e1e1e1]"
-             }`}
-           >
-             {f.label}
-             {matchFilter === f.value && (
-               <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#2eab7e] rounded-full" />
-             )}
-           </button>
-         ))}
-       </div>
+        {filters.map((f, i) => (
+          <button
+            key={f.value}
+            onClick={() => onFilterChange?.(f.value)}
+            className={`relative flex-1 py-3 px-2 text-[12px] md:text-[13px] font-bold transition-colors whitespace-nowrap ${i > 0 ? "border-l border-white/5" : ""} ${matchFilter === f.value
+                ? "text-white"
+                : "text-[#9e9eb1] hover:text-[#e1e1e1]"
+              }`}
+          >
+            {f.label}
+            {matchFilter === f.value && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#2eab7e] rounded-full" />
+            )}
+          </button>
+        ))}
+      </div>
 
-       {isLoading && matches.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-14 text-[#9e9eb1]">
-            <div className="w-8 h-8 border-2 border-[#4c92fc]/30 border-t-[#4c92fc] rounded-full animate-spin" />
-            <span className="text-[13px] font-bold">Buscando partidas...</span>
-          </div>
-       )}
-       {!isLoading && matches.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-2 py-14 liquid-glass rounded-2xl text-[#9e9eb1] shadow-2xl">
-            <span className="text-[28px]">🔍</span>
-            <p className="text-[14px] font-bold text-white">Nenhuma partida encontrada</p>
-            <p className="text-[12px]">Não há partidas registradas neste modo para este invocador.</p>
-          </div>
-       )}
+      {isLoading && matches.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-3 py-14 text-[#9e9eb1]">
+          <div className="w-8 h-8 border-2 border-[#4c92fc]/30 border-t-[#4c92fc] rounded-full animate-spin" />
+          <span className="text-[13px] font-bold">Buscando partidas...</span>
+        </div>
+      )}
+      {!isLoading && matches.length === 0 && (
+        <div className="flex flex-col items-center justify-center gap-2 py-14 liquid-glass rounded-2xl text-[#9e9eb1] shadow-2xl">
+          <span className="text-[28px]">🔍</span>
+          <p className="text-[14px] font-bold text-white">Nenhuma partida encontrada</p>
+          <p className="text-[12px]">Não há partidas registradas neste modo para este invocador.</p>
+        </div>
+      )}
       {matches.map((match, idx) => {
         const p = match.info.participants.find((p) => p.puuid === summoner.account.puuid);
         if (!p) return null;
@@ -364,10 +351,10 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
         const allScores = match.info.participants.map(part => {
           return { puuid: part.puuid, teamId: part.teamId, win: part.win, score: calculateAIScore(part, match).score };
         }).sort((a, b) => b.score - a.score);
-        
+
         const myRankIndex = allScores.findIndex(s => s.puuid === p.puuid);
         const myRank = myRankIndex + 1;
-        
+
         const winningTeamId = match.info.participants.find(part => part.win)?.teamId;
         const losingTeamId = match.info.participants.find(part => !part.win)?.teamId;
 
@@ -386,7 +373,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
 
 
         const isWin = p.win;
-        
+
         let cardBg = isWin ? "bg-[#4c92fc]/[0.08]" : "bg-[#f24254]/[0.05]";
         let borderColor = isWin ? "border-white/10" : "border-white/10";
         let hoverGlow = isWin ? "group-hover:bg-[#4c92fc]/[0.12]" : "group-hover:bg-[#f24254]/[0.08]";
@@ -410,32 +397,32 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
             key={match.metadata.matchId}
             id={`match-container-${match.metadata.matchId}`}
             className={cn(
-               "group relative rounded-[20px] mb-3 transition-all duration-500 overflow-hidden",
-               "backdrop-blur-[24px] saturate-[120%] border",
-               borderColor,
-               cardBg,
-               "hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+              "group relative rounded-[20px] mb-3 transition-all duration-500 overflow-hidden",
+              "backdrop-blur-[24px] saturate-[120%] border",
+              borderColor,
+              cardBg,
+              "hover:shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
             )}
             style={{
-               boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 0 0 1px rgba(255,255,255,0.02)"
+              boxShadow: "0 4px 16px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.15), inset 0 0 0 1px rgba(255,255,255,0.02)"
             }}
           >
-            
+
             <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-            
-            
+
+
             <div className={cn("absolute inset-0 transition-colors duration-500", hoverGlow)} />
 
             <div className="relative flex items-stretch p-0 z-10 w-full h-full">
 
-              
+
               <div className="flex flex-col justify-center px-3 py-2.5 w-[90px] md:w-[100px] shrink-0 border-r border-white/5 relative z-10">
                 <p className={cn("text-[9px] md:text-[10px] font-black uppercase tracking-wider mb-1.5 opacity-80 leading-[1.1] break-words line-clamp-2", textColor)}>
                   {getQueueType(match.info.queueId, match.info.gameMode)}
                 </p>
-                
+
                 <div className="flex flex-col gap-0.5 w-full">
-                  <h3 className={cn("text-[16px] font-black leading-tight tracking-tight uppercase", 
+                  <h3 className={cn("text-[16px] font-black leading-tight tracking-tight uppercase",
                     isWin ? "text-white" : "text-[#e1e1e1]"
                   )}>
                     {isWin ? "Vitória" : "Derrota"}
@@ -444,12 +431,12 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                 </div>
 
                 <div className="mt-2 flex items-center justify-center w-full opacity-40">
-                   <div className="h-[1px] flex-1 bg-white/20" />
-                   <p className="text-[8px] font-black text-white uppercase tracking-wider mx-1.5 whitespace-nowrap">{durationMin}m{durationSec}s</p>
-                   <div className="h-[1px] flex-1 bg-white/20" />
+                  <div className="h-[1px] flex-1 bg-white/20" />
+                  <p className="text-[8px] font-black text-white uppercase tracking-wider mx-1.5 whitespace-nowrap">{durationMin}m{durationSec}s</p>
+                  <div className="h-[1px] flex-1 bg-white/20" />
                 </div>
 
-                
+
                 <div className="flex flex-col w-full mt-2">
                   <span className="text-[7.5px] font-black text-[#9e9eb1] uppercase tracking-[0.05em] mb-1 opacity-60">Score</span>
                   <div className="flex items-start gap-2">
@@ -457,9 +444,9 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
                       <div className={cn(
                         "w-[34px] h-[22px] rounded border flex items-center justify-center shadow-lg transition-colors",
                         (calculateAIScore(p, match).score / 10) >= 8.0 ? "bg-[#f0ba65]/20 border-[#f0ba65]/40 text-[#f0ba65]" :
-                        (calculateAIScore(p, match).score / 10) >= 6.0 ? "bg-[#4c92fc]/20 border-[#4c92fc]/40 text-[#4c92fc]" :
-                        (calculateAIScore(p, match).score / 10) >= 4.0 ? "bg-[#9e9eb1]/20 border-[#9e9eb1]/40 text-[#9e9eb1]" :
-                        "bg-[#f24254]/20 border-[#f24254]/40 text-[#f24254]"
+                          (calculateAIScore(p, match).score / 10) >= 6.0 ? "bg-[#4c92fc]/20 border-[#4c92fc]/40 text-[#4c92fc]" :
+                            (calculateAIScore(p, match).score / 10) >= 4.0 ? "bg-[#9e9eb1]/20 border-[#9e9eb1]/40 text-[#9e9eb1]" :
+                              "bg-[#f24254]/20 border-[#f24254]/40 text-[#f24254]"
                       )}>
                         <span className="text-[12px] md:text-[13px] font-black leading-none tracking-tighter">{(calculateAIScore(p, match).score / 10).toFixed(1)}</span>
                       </div>
@@ -547,22 +534,22 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
 
               </div>
 
-              
+
               <div className="hidden xl:flex gap-3 lg:gap-4 shrink-0 px-2 lg:px-4 py-4 border-l border-white/5 bg-black/5 relative z-10 w-[240px] xl:w-[280px] justify-between">
                 {[match.info.participants.slice(0, 5), match.info.participants.slice(5, 10)].map((team, teamIdx) => (
                   <div key={teamIdx} className="flex flex-col justify-center gap-1.5 w-[110px] xl:w-[124px] shrink-0 h-full my-auto">
                     {team.map((part, pidx) => (
                       <div key={pidx} className="flex items-center gap-2 group/player min-w-0">
-                        <img 
-                          src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/champion/${getChampionName(part.championName)}.png`} 
-                          className="w-[18px] h-[18px] rounded-sm shrink-0 grayscale group-hover/player:grayscale-0 transition-all border border-white/10" 
-                          alt="" 
+                        <img
+                          src={`https://ddragon.leagueoflegends.com/cdn/16.5.1/img/champion/${getChampionName(part.championName)}.png`}
+                          className="w-[18px] h-[18px] rounded-sm shrink-0 grayscale group-hover/player:grayscale-0 transition-all border border-white/10"
+                          alt=""
                         />
                         <span
                           className={cn(
                             "text-[11px] xl:text-[12px] truncate cursor-pointer transition-colors leading-tight font-bold flex-1",
-                            part.puuid === summoner.account.puuid 
-                              ? "text-white" 
+                            part.puuid === summoner.account.puuid
+                              ? "text-white"
                               : "text-[#9e9eb1] hover:text-[#4c92fc]"
                           )}
                           onClick={() => { if (onPlayerClick && (part.riotIdGameName || part.summonerName)) onPlayerClick(part.riotIdGameName || part.summonerName, part.riotIdTagline || "BR1"); }}
@@ -585,7 +572,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
           </div>
         );
       })}
-      
+
       {matches.length >= 10 && matches.length % 10 === 0 && (
         <button
           onClick={onLoadMore}
@@ -596,7 +583,7 @@ export const MatchHistory: React.FC<MatchHistoryProps> = ({ matches, summoner, r
         </button>
       )}
 
-      
+
       {tooltip && <PlayerTooltip data={tooltip} />}
     </div>
   );

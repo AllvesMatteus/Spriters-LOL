@@ -1,4 +1,3 @@
-// Declarações para importação de arquivos estáticos via Vite
 declare module "*.png" {
   const src: string;
   export default src;

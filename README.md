@@ -26,6 +26,11 @@ O Spriters LOL e uma plataforma de alta fidelidade para analise de desempenho de
 *   Visualizacao Estilizada: Cards de partidas com indicacao de resultado e badges dedicados a conquistas (MVP, ACE, Double/Triple/Quadra/Penta Kill).
 *   Tooltip Detalhado de Invocadores: Painel flutuante exibido ao passar o cursor sobre qualquer jogador da partida, revelando Elo Atual, KDA, Win Rate de partidas recentes e rota mais jogada de forma assincrona.
 
+### Busca Inteligente de Invocadores
+*   **Hashtag Dinâmica e Chip Premium**: Barra de pesquisa aprimorada que separa de forma fluida o Nome do Invocador e a Hashtag (`#tag`) em um chip visual que se desloca dinamicamente ao digitar.
+*   **Comportamento Inteligente de Foco**: Foco automático transferido para a hashtag ao digitar `#` no campo do nome e retorno ao nome ao apagar a tag com `Backspace`. Toda a área livre da barra de busca foca o input de nome ao ser clicada.
+*   **Suporte a Regiões da Riot**: Lista de regiões expandida com todas as 16 plataformas suportadas oficialmente pela API da Riot Games, com traduções perfeitas e suporte a navegação por teclado (setas do teclado, rolagem automática e confirmação com Enter).
+
 ### Conexoes Recentes
 *   Painel Jogado Com: Lista interativa contendo os invocadores com quem voce jogou a favor ou contra nas ultimas 20 partidas, com tooltips de elo e performance individual.
 

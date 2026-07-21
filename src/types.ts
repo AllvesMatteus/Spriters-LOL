@@ -37,6 +37,7 @@ export interface MatchData {
     queueId: number;
     gameCreation?: number;
     gameEndTimestamp?: number;
+    gameVersion?: string;
     participants: Array<{
       puuid: string;
       summonerName: string;
@@ -51,9 +52,7 @@ export interface MatchData {
       totalDamageDealtToChampions: number;
       totalDamageTaken: number;
       visionScore: number;
-      // teamPosition is the official Riot field: "TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"
       teamPosition: string;
-      // individualPosition is a secondary guess, less reliable
       individualPosition: string;
       teamId: number;
       champLevel: number;
@@ -66,33 +65,27 @@ export interface MatchData {
       item4: number;
       item5: number;
       item6: number;
-      // Combat
       doubleKills: number;
       tripleKills: number;
       quadraKills: number;
       pentaKills: number;
       firstBloodKill: boolean;
-      // Farming
       neutralMinionsKilledTeamJungle?: number;
       neutralMinionsKilledEnemyJungle?: number;
-      // Vision
       visionWardsBoughtInGame: number;
       wardsPlaced: number;
       wardsKilled: number;
       detectorWardsPlaced: number;
-      // Objectives & Structures
-      damageDealtToObjectives: number;   // Structures + Dragons + Baron
+      damageDealtToObjectives: number;
       damageDealtToTurrets: number;
       turretKills: number;
       turretTakedowns: number;
       inhibitorKills: number;
-      // Utility / CC
-      timeCCingOthers: number;           // seconds of CC applied
+      timeCCingOthers: number;
       totalTimeCCDealt: number;
       totalHeal: number;
       totalHealsOnTeammates: number;
       totalDamageShieldedOnTeammates: number;
-      // Ranked role
       role: string;
       lane: string;
     }>;
@@ -157,7 +150,73 @@ export interface OverallPerformanceData {
     tier: string;
     rank: string;
     points: number;
+    classificationConfidence?: number;
+    probabilities?: Array<{ tier: string; probability: number }>;
+    explainabilityText?: string;
   };
+}
+
+export type SemanticState =
+  | "WELL_BELOW"
+  | "BELOW"
+  | "WITHIN_EXPECTED"
+  | "ABOVE"
+  | "EXCEPTIONAL";
+
+export interface MetricDistribution {
+  current: number;
+  target: number;
+  percentile: number;
+  expectedRange: [number, number];
+  isWithinRange: boolean;
+  completion: number;
+  confidence: number;
+  sampleSize: number;
+  semanticState?: SemanticState;
+}
+
+export interface PillarScore {
+  score: number;
+  distribution: MetricDistribution;
+}
+
+export interface ImprovementPriority {
+  metric: string;
+  label: string;
+  currentValue: number;
+  targetValue: number;
+  distancePercent: number;
+  impactScore: number;
+  difficulty: 'LOW' | 'MEDIUM' | 'HIGH';
+  estimatedGain: number;
+  explanation: string;
+}
+
+export interface AnalysisContext {
+  region: string;
+  queueId: number;
+  patch: string;
+  tier: string;
+  division: string;
+  role: string;
+  championName?: string;
+}
+
+export interface EnhancedPerformanceData extends OverallPerformanceData {
+  consistencyScore: number;
+  overallIndex: number;
+  pillars: Record<string, PillarScore>;
+  improvementPriorities: ImprovementPriority[];
+  rawMetrics: {
+    csPerMin: number[];
+    kda: number[];
+    visionPerMin: number[];
+    damagePerMin: number[];
+    goldPerMin: number[];
+    kp: number[];
+    objectiveDmgPerMin: number[];
+  };
+  context: AnalysisContext;
 }
 
 export interface RankPointInfo {
